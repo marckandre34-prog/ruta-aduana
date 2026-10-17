@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruta Aduana — Calcule el costo real de importar</title>
+<meta name="description" content="Calculadora de costos de importación para Perú. FOB, CIF, ad valorem, IGV, percepción y precio de venta sugerido.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Shippori+Mincho:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="hanko" aria-hidden="true">関</span>
+    <div>
+      <h1 data-i18n="brand">Ruta Aduana</h1>
+      <p class="tagline" data-i18n="tagline">Calcule el costo real de importar</p>
+    </div>
+  </div>
+  <div class="header-controls">
+    <div class="segmented" role="group" aria-label="Idioma / Language">
+      <button type="button" id="lang-es" class="seg-btn" aria-pressed="true">ES</button>
+      <button type="button" id="lang-en" class="seg-btn" aria-pressed="false">EN</button>
+    </div>
+    <div class="segmented" role="group" aria-label="Modo">
+      <button type="button" id="modo-simple" class="seg-btn" data-i18n="modoSimple" aria-pressed="true">Simple</button>
+      <button type="button" id="modo-avanzado" class="seg-btn" data-i18n="modoAvanzado" aria-pressed="false">Avanzado</button>
+    </div>
+  </div>
+</header>
+
+<svg class="ola" viewBox="0 0 1200 24" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 12 Q 37.5 2, 75 12 T 150 12 T 225 12 T 300 12 T 375 12 T 450 12 T 525 12 T 600 12 T 675 12 T 750 12 T 825 12 T 900 12 T 975 12 T 1050 12 T 1125 12 T 1200 12" fill="none" stroke-width="1.5"/>
+</svg>
+
+<p class="aviso-tasas">
+  <span id="aviso-texto"></span>
+  <a id="aviso-link" href="#" target="_blank" rel="noopener"></a>
+</p>
+
+<main class="layout">
+
+  <!-- ══ Columna izquierda: formulario ══ -->
+  <form id="form" class="col-form" novalidate>
+
+    <section class="card paso" aria-labelledby="t-paso1">
+      <h2 id="t-paso1"><span class="num" aria-hidden="true">1</span> <span data-i18n="paso1">Su compra</span></h2>
+
+      <div class="campo">
+        <label for="f_producto"><span data-i18n="lProducto">Producto</span></label>
+        <input type="text" id="f_producto" data-i18n-ph="phProducto" placeholder="Ej.: audífonos inalámbricos" autocomplete="off">
+      </div>
+
+      <div class="campo">
+        <label for="f_pais"><span data-i18n="lPais">País de origen</span></label>
+        <input type="text" id="f_pais" data-i18n-ph="phPais" placeholder="Ej.: China" autocomplete="off">
+      </div>
+
+      <div class="fila">
+        <div class="campo">
+          <label for="f_cantidad"><span data-i18n="lCantidad">Cantidad</span></label>
+          <input type="number" id="f_cantidad" min="1" step="1" inputmode="numeric" required>
+        </div>
+        <div class="campo">
+          <label for="f_precio">
+            <span data-i18n="lPrecioFob">Precio por unidad (FOB)</span>
+            <button type="button" class="ayuda" data-help="fob" aria-label="?">?</button>
+          </label>
+          <div class="grupo-moneda">
+            <input type="number" id="f_precio" min="0" step="any" inputmode="decimal" required>
+            <select id="f_moneda" aria-label="Moneda">
+              <option value="USD">USD</option><option value="EUR">EUR</option>
+              <option value="CNY">CNY</option><option value="PEN">PEN</option>
+            </select>
+          </div>
+          <div class="tc-row" id="tc-row-fob" hidden>
+            <label for="tc_fob"><span class="tc-label"></span></label>
+            <input type="number" id="tc_fob" min="0" step="any" inputmode="decimal">
+            <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card paso" aria-labelledby="t-paso2">
+      <h2 id="t-paso2"><span class="num" aria-hidden="true">2</span> <span data-i18n="paso2">Transporte y seguro</span></h2>
+
+      <div class="campo">
+        <label for="f_flete">
+          <span data-i18n="lFlete">Flete internacional (total)</span>
+          <button type="button" class="ayuda" data-help="incoterm" aria-label="?">?</button>
+        </label>
+        <div class="grupo-moneda">
+          <input type="number" id="f_flete" min="0" step="any" inputmode="decimal">
+          <select id="f_moneda_flete" aria-label="Moneda">
+            <option value="USD">USD</option><option value="EUR">EUR</option>
+            <option value="CNY">CNY</option><option value="PEN">PEN</option>
+          </select>
+        </div>
+        <div class="tc-row" id="tc-row-flete" hidden>
+          <label for="tc_flete"><span class="tc-label"></span></label>
+          <input type="number" id="tc_flete" min="0" step="any" inputmode="decimal">
+          <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
+        </div>
+      </div>
+
+      <div class="campo advanced-only">
+        <label><span data-i18n="lSeguro">Seguro</span>
+          <button type="button" class="ayuda" data-help="cif" aria-label="?">?</button>
+        </label>
+        <div class="segmented seg-seguro" role="group">
+          <button type="button" id="seguro-auto" class="seg-btn" data-i18n="seguroAuto" aria-pressed="true">Automático (1% del FOB)</button>
+          <button type="button" id="seguro-manual" class="seg-btn" data-i18n="seguroManual" aria-pressed="false">Ingresar monto</button>
+        </div>
+        <div id="seguro-manual-box" hidden>
+          <label for="f_seguro" class="sub-label"><span data-i18n="lMontoSeguro">Monto del seguro</span></label>
+          <div class="grupo-moneda">
+            <input type="number" id="f_seguro" min="0" step="any" inputmode="decimal">
+            <select id="f_moneda_seguro" aria-label="Moneda">
+              <option value="USD">USD</option><option value="EUR">EUR</option>
+              <option value="CNY">CNY</option><option value="PEN">PEN</option>
+            </select>
+          </div>
+          <div class="tc-row" id="tc-row-seguro" hidden>
+            <label for="tc_seguro"><span class="tc-label"></span></label>
+            <input type="number" id="tc_seguro" min="0" step="any" inputmode="decimal">
+            <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card paso" aria-labelledby="t-paso3">
+      <h2 id="t-paso3"><span class="num" aria-hidden="true">3</span> <span data-i18n="paso3">Impuestos y gastos</span></h2>
+
+      <div class="campo">
+        <label for="f_adv">
+          <span data-i18n="lAdValorem">Arancel (ad valorem)</span>
+          <button type="button" class="ayuda" data-help="adv" aria-label="?">?</button>
+        </label>
+        <select id="f_adv"></select>
+        <input type="number" id="f_adv_custom" min="0" max="99" step="any" inputmode="decimal" hidden aria-label="Otra tasa %">
+        <a href="#" id="adv-ayuda" class="enlace-ayuda" target="_blank" rel="noopener" data-i18n="advAyuda">¿No sabe cuál elegir? Busque su producto en el arancel de SUNAT</a>
+      </div>
+
+      <div class="campo advanced-only">
+        <label for="f_isc">
+          <span data-i18n="lIsc">ISC (impuesto selectivo)</span>
+          <button type="button" class="ayuda" data-help="isc" aria-label="?">?</button>
+        </label>
+        <div class="grupo-pct"><input type="number" id="f_isc" min="0" max="99" step="any" inputmode="decimal" value="0"><span class="unidad">%</span></div>
+      </div>
+
+      <div class="campo advanced-only">
+        <label for="f_percepcion">
+          <span data-i18n="lPercepcion">Percepción</span>
+          <button type="button" class="ayuda" data-help="percepcion" aria-label="?">?</button>
+        </label>
+        <select id="f_percepcion"></select>
+        <label for="f_percepcion_fija" class="sub-label">
+          <span data-i18n="lPercepcionFija">o monto fijo por unidad (S/)</span>
+          <button type="button" class="ayuda" data-help="percepcionFija" aria-label="?">?</button>
+        </label>
+        <input type="number" id="f_percepcion_fija" min="0" step="any" inputmode="decimal" placeholder="0.00">
+      </div>
+
+      <fieldset class="campo advanced-only">
+        <legend><span data-i18n="lGastosLocales">Gastos locales (en soles)</span></legend>
+        <div class="grid-locales">
+          <div class="campo"><label for="f_agente" data-i18n="lAgente">Agente de aduana</label>
+            <input type="number" id="f_agente" min="0" step="any" inputmode="decimal"></div>
+          <div class="campo"><label for="f_desaduanaje" data-i18n="lDesaduanaje">Desaduanaje y gastos portuarios</label>
+            <input type="number" id="f_desaduanaje" min="0" step="any" inputmode="decimal"></div>
+          <div class="campo"><label for="f_almacenaje" data-i18n="lAlmacenaje">Almacenaje</label>
+            <input type="number" id="f_almacenaje" min="0" step="any" inputmode="decimal"></div>
+          <div class="campo"><label for="f_transporte" data-i18n="lTransporte">Transporte local</label>
+            <input type="number" id="f_transporte" min="0" step="any" inputmode="decimal"></div>
+          <div class="campo"><label for="f_otros" data-i18n="lOtros">Otros</label>
+            <input type="number" id="f_otros" min="0" step="any" inputmode="decimal"></div>
+        </div>
+      </fieldset>
+
+      <div class="campo advanced-only">
+        <label><span data-i18n="lRecupera">¿Tiene RUC y recupera el IGV?</span>
+          <button type="button" class="ayuda" data-help="recupera" aria-label="?">?</button>
+        </label>
+        <div class="segmented" role="group">
+          <button type="button" id="recupera-si" class="seg-btn" data-i18n="si" aria-pressed="true">Sí</button>
+          <button type="button" id="recupera-no" class="seg-btn" data-i18n="no" aria-pressed="false">No</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="f_margen">
+          <span data-i18n="lMargen">Margen de ganancia deseado (%)</span>
+          <button type="button" class="ayuda" data-help="margen" aria-label="?">?</button>
+        </label>
+        <div class="grupo-pct"><input type="number" id="f_margen" min="0" max="99" step="any" inputmode="decimal" value="30"><span class="unidad">%</span></div>
+      </div>
+    </section>
+
+    <div class="acciones-form">
+      <button type="button" id="btn-ejemplo" class="btn btn-sec" data-i18n="btnEjemplo">Cargar ejemplo</button>
+      <button type="button" id="btn-borrar" class="btn btn-sec" data-i18n="btnBorrar">Borrar todo</button>
+    </div>
+  </form>
+
+  <!-- ══ Columna derecha: resultados ══ -->
+  <aside class="col-results" id="resultados" aria-live="polite">
+    <div class="card resultados-card">
+      <h2 class="res-titulo"><span data-i18n="resTitulo">Resultados</span>
+        <button type="button" class="ayuda" data-help="desembolso" aria-label="?">?</button>
+      </h2>
+
+      <div id="estado-vacio" class="vacio">
+        <p class="vacio-titulo" data-i18n="vacioTitulo">Aquí verá su resultado</p>
+        <p data-i18n="vacioTexto">Complete «1. Su compra» y el cálculo aparecerá mientras escribe.</p>
+      </div>
+
+      <div id="estado-errores" class="errores" hidden>
+        <p id="faltan-texto" data-i18n="faltan">Para ver el resultado, revise:</p>
+        <ul id="lista-errores"></ul>
+      </div>
+
+      <div id="resultados-contenido" hidden>
+        <div class="res-principal">
+          <div class="res-bloque">
+            <p class="res-label" data-i18n="resCostoUnidad">Su costo por unidad</p>
+            <p class="res-numero" id="r_costo">S/ 0.00</p>
+          </div>
+          <div class="res-bloque res-precio">
+            <p class="res-label" data-i18n="resPrecioSugerido">Precio de venta sugerido</p>
+            <p class="res-numero" id="r_precio">S/ 0.00</p>
+            <p class="res-sub"><span id="r_precio_igv"></span> <span data-i18n="resConIgv">con IGV incluido</span></p>
+            <p class="res-sub" id="r_markup"></p>
+          </div>
+        </div>
+
+        <div class="res-desembolso">
+          <p class="res-label"><span data-i18n="resDesembolso">Dinero para aduana</span></p>
+          <p class="res-numero-med" id="r_desembolso">S/ 0.00</p>
+          <p class="res-sub" data-i18n="resDesembolsoNota">Tributos + percepción que se pagan antes de retirar la carga.</p>
+          <p class="res-sub" id="r_recupera"></p>
+        </div>
+
+        <svg class="ola ola-inner" viewBox="0 0 600 20" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 10 Q 25 2, 50 10 T 100 10 T 150 10 T 200 10 T 250 10 T 300 10 T 350 10 T 400 10 T 450 10 T 500 10 T 550 10 T 600 10" fill="none" stroke-width="1.5"/>
+        </svg>
+
+        <p class="res-label" data-i18n="resDesglose">¿En qué se va el costo?</p>
+        <div class="barra" role="img" id="barra" aria-label="Desglose del costo">
+          <div class="seg seg-producto" id="bar-producto"></div>
+          <div class="seg seg-flete" id="bar-flete"></div>
+          <div class="seg seg-impuestos" id="bar-impuestos"></div>
+          <div class="seg seg-locales" id="bar-locales"></div>
+        </div>
+        <ul class="leyenda" id="leyenda"></ul>
+
+        <div id="escenarios-box" class="advanced-only" hidden>
+          <p class="res-label" data-i18n="escTitulo">Si el tipo de cambio se mueve</p>
+          <table class="tabla-esc">
+            <thead><tr>
+              <th data-i18n="escColEsc">Escenario</th>
+              <th data-i18n="escColCosto">Costo por unidad</th>
+              <th data-i18n="escColPrecio">Precio sugerido</th>
+            </tr></thead>
+            <tbody id="tabla-esc"></tbody>
+          </table>
+        </div>
+
+        <details id="det-pasos" class="detalle">
+          <summary data-i18n="pasosTitulo">Explicación paso a paso</summary>
+          <ol id="lista-pasos" class="lista-pasos"></ol>
+        </details>
+
+        <details class="detalle">
+          <summary data-i18n="resDetalle">Detalle de números</summary>
+          <dl id="detalle-numeros" class="detalle-dl"></dl>
+        </details>
+
+        <div class="acciones-res">
+          <button type="button" id="btn-copiar" class="btn btn-sec" data-i18n="btnCopiar">Copiar resumen</button>
+          <button type="button" id="btn-imprimir" class="btn btn-sec" data-i18n="btnImprimir">Imprimir / guardar PDF</button>
+          <button type="button" id="btn-guardar" class="btn btn-sec" data-i18n="btnGuardar">Guardar este cálculo</button>
+          <button type="button" id="btn-miscalculos" class="btn btn-sec" data-i18n="btnMisCalculos" aria-expanded="false">Mis cálculos</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card guardados-card" id="guardados-card" hidden>
+      <h2 class="res-titulo" data-i18n="btnMisCalculos">Mis cálculos</h2>
+      <ul id="lista-guardados" class="lista-guardados"></ul>
+    </div>
+  </aside>
+</main>
+
+<button type="button" id="btn-ver-resultado" class="btn btn-prim flotante" data-i18n="btnVerResultado">Ver resultado</button>
+
+<footer class="site-footer">
+  <p data-i18n="disclaimer">Herramienta de estimación. No constituye asesoría aduanera, contable ni tributaria.</p>
+</footer>
+
+<div id="tooltip-pop" class="tooltip" role="tooltip" hidden></div>
+
+<script src="i18n.js"></script>
+<script src="calc.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "vigente_a_fecha": "2026-10-17",
+  "fuente": "SUNAT — Arancel de Aduanas. Tasas referenciales: verifique la subpartida de su producto antes de decidir.",
+  "sunat_arancel_url": "https://www.aduanet.gob.pe/itarancel/arancelS01Alias",
+  "igv": 0.16,
+  "ipm": 0.02,
+  "ad_valorem_opciones": [0, 0.04, 0.06, 0.11],
+  "ad_valorem_opciones_simple": [0, 0.06, 0.11],
+  "percepcion_opciones": [0, 0.035, 0.05, 0.10],
+  "percepcion_default": 0.035,
+  "seguro_default": 0.01,
+  "isc_default": 0,
+  "tipo_cambio_referencial": {
+    "USD": 3.75,
+    "EUR": 4.10,
+    "CNY": 0.52,
+    "PEN": 1
+  },
+  "escenarios_tipo_cambio": [-0.03, 0, 0.05, 0.10]
+}

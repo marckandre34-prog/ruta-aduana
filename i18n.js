@@ -1,0 +1,292 @@
+/*
+ * i18n.js — Textos de la interfaz en español (Perú) e inglés.
+ * Global `I18N`. Las plantillas usan {marcadores} reemplazados por app.js.
+ */
+(function (global) {
+  'use strict';
+
+  const I18N = {
+    es: {
+      brand: 'Ruta Aduana',
+      tagline: 'Calcule el costo real de importar',
+      modoSimple: 'Simple',
+      modoAvanzado: 'Avanzado',
+      avisoTasas: 'Tasas referenciales (al {fecha}). Verifique la subpartida y las tasas vigentes en SUNAT antes de decidir.',
+      avisoSunatLink: 'Buscador arancelario de SUNAT',
+
+      paso1: 'Su compra',
+      paso2: 'Transporte y seguro',
+      paso3: 'Impuestos y gastos',
+
+      lProducto: 'Producto',
+      phProducto: 'Ej.: audífonos inalámbricos',
+      lPais: 'País de origen',
+      phPais: 'Ej.: China',
+      lCantidad: 'Cantidad',
+      lPrecioFob: 'Precio por unidad (FOB)',
+      lMoneda: 'Moneda',
+      lTc: '1 {moneda} = S/',
+      tcNota: 'Referencial, actualícelo',
+      lFlete: 'Flete internacional (total)',
+      lSeguro: 'Seguro',
+      seguroAuto: 'Automático (1% del FOB)',
+      seguroManual: 'Ingresar monto',
+      lMontoSeguro: 'Monto del seguro',
+      lAdValorem: 'Arancel (ad valorem)',
+      advAyuda: '¿No sabe cuál elegir? Busque su producto en el arancel de SUNAT',
+      advOtro: 'Otra tasa…',
+      lIsc: 'ISC (impuesto selectivo)',
+      lPercepcion: 'Percepción',
+      lPercepcionFija: 'o monto fijo por unidad (S/)',
+      lGastosLocales: 'Gastos locales (en soles)',
+      lAgente: 'Agente de aduana',
+      lDesaduanaje: 'Desaduanaje y gastos portuarios',
+      lAlmacenaje: 'Almacenaje',
+      lTransporte: 'Transporte local',
+      lOtros: 'Otros',
+      lRecupera: '¿Tiene RUC y recupera el IGV?',
+      si: 'Sí',
+      no: 'No',
+      lMargen: 'Margen de ganancia deseado (%)',
+
+      help: {
+        fob: 'FOB es el precio de la mercadería puesta a bordo del barco o avión en origen, sin flete ni seguro. Si 100 audífonos cuestan USD 5 cada uno, el FOB es USD 500.',
+        cif: 'CIF es el valor en aduana: producto + flete + seguro. Es la base sobre la que SUNAT calcula los tributos. Ej.: FOB S/ 500 + flete S/ 100 + seguro S/ 5 = CIF S/ 605.',
+        incoterm: 'Los Incoterms son reglas internacionales que definen quién paga cada tramo del viaje (FOB, CIF, EXW…). Pregunte a su proveedor qué Incoterm le cotiza.',
+        adv: 'El ad valorem es el arancel: un porcentaje del valor CIF que se paga al Estado. Muchos productos pagan 0% u 6%; algunos textiles y calzado pagan 11%. Ej.: 6% de S/ 1,000 = S/ 60.',
+        igv: 'El IGV es el impuesto general a las ventas (16%). En la importación se paga en aduana sobre el CIF más el arancel. Ej.: 16% de S/ 1,060 = S/ 169.60.',
+        ipm: 'El IPM es el impuesto de promoción municipal (2%). Se calcula sobre la misma base que el IGV. Juntos suman el 18% habitual.',
+        isc: 'El ISC es un impuesto adicional solo para ciertos productos (licores, cigarrillos, combustibles, vehículos). La mayoría de productos paga 0%.',
+        percepcion: 'La percepción es un adelanto del impuesto a la renta que SUNAT cobra en aduana (habitualmente 3.5%). Con RUC se descuenta de sus impuestos futuros; sin RUC puede ser un costo definitivo.',
+        percepcionFija: 'Para mercancías declaradas "sensibles al fraude", SUNAT puede aplicar un monto fijo por unidad en vez del porcentaje. Se cobra el mayor de los dos.',
+        margen: 'El margen es la parte del precio final que es ganancia. Un margen del 30% significa que de cada S/ 100 vendidos, S/ 30 son ganancia. No es lo mismo que el markup (recargo sobre el costo).',
+        recupera: 'Con RUC, el IGV que paga al importar se convierte en crédito fiscal: lo descuenta del IGV de sus ventas. Sin RUC, ese IGV es un costo más.',
+        desembolso: 'Es el dinero que debe tener listo para que su agente de aduana pague los tributos y pueda retirar la mercadería.'
+      },
+
+      resTitulo: 'Resultados',
+      resCostoUnidad: 'Su costo por unidad',
+      resPrecioSugerido: 'Precio de venta sugerido',
+      resSinIgv: 'sin IGV',
+      resConIgv: 'con IGV incluido',
+      resMarkup: 'Equivale a recargar {markup}% sobre el costo',
+      resDesembolso: 'Dinero para aduana',
+      resDesembolsoNota: 'Tributos + percepción que se pagan antes de retirar la carga.',
+      resRecupera: 'Además paga {monto} que recupera después (IGV, IPM y percepción).',
+      resNoRecupera: 'Paga además {monto} de percepción (pago a cuenta del impuesto a la renta).',
+      resDesglose: '¿En qué se va el costo?',
+      segProducto: 'Producto',
+      segFlete: 'Flete y seguro',
+      segImpuestos: 'Aranceles e impuestos',
+      segLocales: 'Gastos locales',
+      resDetalle: 'Detalle de números',
+
+      pasosTitulo: 'Explicación paso a paso',
+      pasos: [
+        'Su mercadería cuesta {fob} en origen ({cantidad} × {precioUnit} {moneda}).',
+        'Con el flete ({flete}) y el seguro ({seguro}), el valor en aduana (CIF) es {cif}.',
+        'El arancel del {advPct}% suma {adv} y la base del IGV queda en {baseIgv}.',
+        'El IGV (16%) es {igv} y el IPM (2%) es {ipm}: tributos totales de {tributos}.',
+        'La percepción en aduana es {percepcion}.',
+        'Los gastos locales suman {locales}.',
+        'Así, el costo puesto en su almacén es {costo}: {porUnidad} por unidad.',
+        'Con un margen del {margen}%, el precio sugerido es {precio} sin IGV ({precioIgv} con IGV).'
+      ],
+      pasoRecupera: 'Como recupera el IGV con su RUC, el IGV+IPM ({monto}) no es costo: lo descontará de sus ventas.',
+      pasoNoRecupera: 'Como no recupera el IGV, el IGV+IPM ({monto}) sí forma parte de su costo.',
+      pasoIsc: 'El ISC del {pct}% agrega {monto}.',
+
+      escTitulo: 'Si el tipo de cambio se mueve',
+      escColEsc: 'Escenario',
+      escColTc: 'Tipo de cambio',
+      escColCosto: 'Costo por unidad',
+      escColPrecio: 'Precio sugerido',
+      escBaja: 'Baja {pct}%',
+      escIgual: 'Se mantiene',
+      escSube: 'Sube {pct}%',
+
+      btnEjemplo: 'Cargar ejemplo',
+      btnCopiar: 'Copiar resumen',
+      btnCopiado: '¡Copiado!',
+      btnImprimir: 'Imprimir / guardar PDF',
+      btnGuardar: 'Guardar este cálculo',
+      btnGuardado: 'Guardado',
+      btnMisCalculos: 'Mis cálculos',
+      btnBorrar: 'Borrar todo',
+      btnVerResultado: 'Ver resultado',
+
+      vacioTitulo: 'Aquí verá su resultado',
+      vacioTexto: 'Complete «1. Su compra» y el cálculo aparecerá mientras escribe. O cargue el ejemplo para verlo funcionando.',
+      faltan: 'Para ver el resultado, revise:',
+      err: {
+        falta_numero: 'Ingrese un número',
+        min_uno: 'La cantidad debe ser al menos 1',
+        no_negativo: 'No puede ser negativo',
+        menor_cien: 'Debe ser menor que 100%',
+        tc_invalido: 'Ingrese el tipo de cambio a soles'
+      },
+
+      guardadosVacio: 'Aún no ha guardado cálculos.',
+      btnCargar: 'Cargar',
+      btnEliminar: 'Eliminar',
+
+      resumenCopia: [
+        '— {brand} —',
+        'Producto: {producto} ({cantidad} u. desde {pais})',
+        'Costo por unidad: {costo}',
+        'Precio sugerido: {precio} sin IGV ({precioIgv} con IGV)',
+        'Dinero para aduana: {desembolso}',
+        'Valor CIF: {cif} | Tributos: {tributos} | Percepción: {percepcion}',
+        'Gastos locales: {locales}',
+        'Estimación referencial. Verifique tasas en SUNAT.'
+      ],
+
+      disclaimer: 'Herramienta de estimación. No constituye asesoría aduanera, contable ni tributaria. Los resultados dependen de las tasas y datos ingresados.',
+      confirmarBorrar: '¿Borrar todos los datos del formulario?',
+      confirmarEliminar: '¿Eliminar este cálculo guardado?'
+    },
+
+    en: {
+      brand: 'Ruta Aduana',
+      tagline: 'Calculate the true cost of importing',
+      modoSimple: 'Simple',
+      modoAvanzado: 'Advanced',
+      avisoTasas: 'Reference rates (as of {fecha}). Check your tariff heading and current rates at SUNAT before deciding.',
+      avisoSunatLink: 'SUNAT tariff search',
+
+      paso1: 'Your purchase',
+      paso2: 'Freight & insurance',
+      paso3: 'Taxes & expenses',
+
+      lProducto: 'Product',
+      phProducto: 'E.g.: wireless earbuds',
+      lPais: 'Country of origin',
+      phPais: 'E.g.: China',
+      lCantidad: 'Quantity',
+      lPrecioFob: 'Unit price (FOB)',
+      lMoneda: 'Currency',
+      lTc: '1 {moneda} = S/',
+      tcNota: 'Reference only — please update',
+      lFlete: 'International freight (total)',
+      lSeguro: 'Insurance',
+      seguroAuto: 'Automatic (1% of FOB)',
+      seguroManual: 'Enter amount',
+      lMontoSeguro: 'Insurance amount',
+      lAdValorem: 'Tariff (ad valorem)',
+      advAyuda: 'Not sure which one? Look up your product in the SUNAT tariff',
+      advOtro: 'Other rate…',
+      lIsc: 'ISC (selective tax)',
+      lPercepcion: 'Perception (prepayment)',
+      lPercepcionFija: 'or fixed amount per unit (S/)',
+      lGastosLocales: 'Local expenses (in soles)',
+      lAgente: 'Customs broker',
+      lDesaduanaje: 'Clearance & port fees',
+      lAlmacenaje: 'Storage',
+      lTransporte: 'Local transport',
+      lOtros: 'Other',
+      lRecupera: 'Do you have a RUC and recover VAT?',
+      si: 'Yes',
+      no: 'No',
+      lMargen: 'Desired profit margin (%)',
+
+      help: {
+        fob: 'FOB is the price of the goods loaded on the ship or plane at origin, without freight or insurance. If 100 earbuds cost USD 5 each, FOB is USD 500.',
+        cif: 'CIF is the customs value: goods + freight + insurance. SUNAT computes taxes on this base. E.g.: FOB S/ 500 + freight S/ 100 + insurance S/ 5 = CIF S/ 605.',
+        incoterm: 'Incoterms are international rules defining who pays each leg of the trip (FOB, CIF, EXW…). Ask your supplier which Incoterm they quote.',
+        adv: 'Ad valorem is the tariff: a percentage of the CIF value paid to the State. Many products pay 0% or 6%; some textiles and footwear pay 11%. E.g.: 6% of S/ 1,000 = S/ 60.',
+        igv: 'IGV is the general sales tax (16%). On imports it is paid at customs over CIF plus tariff. E.g.: 16% of S/ 1,060 = S/ 169.60.',
+        ipm: 'IPM is the municipal promotion tax (2%). It uses the same base as IGV. Together they make the usual 18%.',
+        isc: 'ISC is an extra tax only on certain goods (liquor, cigarettes, fuels, vehicles). Most products pay 0%.',
+        percepcion: 'The perception is an income-tax prepayment SUNAT collects at customs (usually 3.5%). With a RUC it offsets future taxes; without one it may become a final cost.',
+        percepcionFija: 'For goods deemed "fraud-sensitive", SUNAT may charge a fixed amount per unit instead of a percentage. The higher of the two applies.',
+        margen: 'Margin is the share of the final price that is profit. A 30% margin means that out of every S/ 100 sold, S/ 30 is profit. It is not the same as markup (the surcharge over cost).',
+        recupera: 'With a RUC, the VAT paid on imports becomes a tax credit: you deduct it from the VAT on your sales. Without a RUC, that VAT is an extra cost.',
+        desembolso: 'This is the cash your customs broker needs to pay taxes so the goods can be released.'
+      },
+
+      resTitulo: 'Results',
+      resCostoUnidad: 'Your cost per unit',
+      resPrecioSugerido: 'Suggested sale price',
+      resSinIgv: 'before VAT',
+      resConIgv: 'VAT included',
+      resMarkup: 'Same as marking up {markup}% over cost',
+      resDesembolso: 'Cash needed at customs',
+      resDesembolsoNota: 'Taxes + perception paid before the cargo is released.',
+      resRecupera: 'You also pay {monto} that you recover later (IGV, IPM and perception).',
+      resNoRecupera: 'You also pay {monto} of perception (income-tax prepayment).',
+      resDesglose: 'Where does the cost go?',
+      segProducto: 'Product',
+      segFlete: 'Freight & insurance',
+      segImpuestos: 'Tariffs & taxes',
+      segLocales: 'Local expenses',
+      resDetalle: 'Number details',
+
+      pasosTitulo: 'Step-by-step explanation',
+      pasos: [
+        'Your goods cost {fob} at origin ({cantidad} × {precioUnit} {moneda}).',
+        'With freight ({flete}) and insurance ({seguro}), the customs value (CIF) is {cif}.',
+        'The {advPct}% tariff adds {adv} and the VAT base becomes {baseIgv}.',
+        'IGV (16%) is {igv} and IPM (2%) is {ipm}: total duties of {tributos}.',
+        'The customs perception is {percepcion}.',
+        'Local expenses add up to {locales}.',
+        'So the landed cost is {costo}: {porUnidad} per unit.',
+        'With a {margen}% margin, the suggested price is {precio} before VAT ({precioIgv} VAT included).'
+      ],
+      pasoRecupera: 'Since you recover VAT with your RUC, IGV+IPM ({monto}) is not a cost: you deduct it from your sales.',
+      pasoNoRecupera: 'Since you do not recover VAT, IGV+IPM ({monto}) is part of your cost.',
+      pasoIsc: 'The {pct}% ISC adds {monto}.',
+
+      escTitulo: 'If the exchange rate moves',
+      escColEsc: 'Scenario',
+      escColTc: 'Exchange rate',
+      escColCosto: 'Cost per unit',
+      escColPrecio: 'Suggested price',
+      escBaja: 'Drops {pct}%',
+      escIgual: 'Stays flat',
+      escSube: 'Rises {pct}%',
+
+      btnEjemplo: 'Load example',
+      btnCopiar: 'Copy summary',
+      btnCopiado: 'Copied!',
+      btnImprimir: 'Print / save PDF',
+      btnGuardar: 'Save this calculation',
+      btnGuardado: 'Saved',
+      btnMisCalculos: 'My calculations',
+      btnBorrar: 'Clear all',
+      btnVerResultado: 'See result',
+
+      vacioTitulo: 'Your result will appear here',
+      vacioTexto: 'Fill in "1. Your purchase" and the calculation appears as you type. Or load the example to see it work.',
+      faltan: 'To see the result, please check:',
+      err: {
+        falta_numero: 'Enter a number',
+        min_uno: 'Quantity must be at least 1',
+        no_negativo: 'Cannot be negative',
+        menor_cien: 'Must be under 100%',
+        tc_invalido: 'Enter the exchange rate to soles'
+      },
+
+      guardadosVacio: 'No saved calculations yet.',
+      btnCargar: 'Load',
+      btnEliminar: 'Delete',
+
+      resumenCopia: [
+        '— {brand} —',
+        'Product: {producto} ({cantidad} units from {pais})',
+        'Cost per unit: {costo}',
+        'Suggested price: {precio} before VAT ({precioIgv} VAT incl.)',
+        'Cash needed at customs: {desembolso}',
+        'CIF value: {cif} | Duties: {tributos} | Perception: {percepcion}',
+        'Local expenses: {locales}',
+        'Reference estimate. Verify rates at SUNAT.'
+      ],
+
+      disclaimer: 'Estimation tool. It is not customs, accounting or tax advice. Results depend on the rates and data you enter.',
+      confirmarBorrar: 'Clear all form data?',
+      confirmarEliminar: 'Delete this saved calculation?'
+    }
+  };
+
+  global.I18N = I18N;
+  if (typeof module !== 'undefined' && module.exports) module.exports = I18N;
+})(typeof window !== 'undefined' ? window : globalThis);

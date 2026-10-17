@@ -1,0 +1,13 @@
+# Dependencias y build (no se usan, por si acaso)
+node_modules/
+dist/
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
