@@ -1,34 +1,45 @@
-/* ═══ Ruta Aduana — estética Japandi ═══ */
+/* ═══ Ruta Aduana — estética Japandi sobria (tema claro índigo) ═══ */
 :root {
-  --fondo: #F5F1EA;
-  --superficie: #FBF9F5;
-  --arena: #E8DFD1;
-  --linea: #D9CFBF;
-  --texto: #2B2A28;
-  --texto-suave: #6B655C;
-  --salvia: #7F8F7A;
-  --salvia-oscuro: #5E6E5A;
-  --terracota: #B26A4A;
+  --fondo: #F6F3EE;
+  --superficie: #FFFFFF;
+  --superficie-2: #FAF8F4;
+  --linea: #E3DDD2;
+  --texto: #2A2D34;
+  --texto-suave: #666C76;
+  --primario: #3A4F6B;
+  --primario-oscuro: #2D3F57;
+  --primario-suave: #E7ECF3;
+  --positivo: #5E7F68;
+  --atencion: #B7791F;
+  --atencion-fondo: #FBF3E2;
+  --alerta: #B24A3B;
+  --alerta-fondo: #FBEDEA;
   --madera: #A98C6A;
+  --gris-calido: #B3AA9C;
   --radio: 14px;
-  --sombra: 0 1px 3px rgba(43, 42, 40, 0.06);
+  --sombra: 0 1px 3px rgba(42, 45, 52, 0.07);
   --transicion: 180ms ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #1F1E1C;
-    --superficie: #292724;
-    --arena: #3A362F;
-    --linea: #46413A;
-    --texto: #EDE8E0;
-    --texto-suave: #A89E90;
-    --salvia: #8FA088;
-    --salvia-oscuro: #A9B8A2;
-    --terracota: #C98A68;
-    --madera: #B99D7B;
-    --sombra: 0 1px 3px rgba(0, 0, 0, 0.35);
-  }
+/* Modo oscuro: solo por botón, nunca automático */
+:root[data-tema="oscuro"] {
+  --fondo: #1C2026;
+  --superficie: #252A31;
+  --superficie-2: #2B3138;
+  --linea: #3A414B;
+  --texto: #E8E6E1;
+  --texto-suave: #A9AEB8;
+  --primario: #8FA6C4;
+  --primario-oscuro: #B7C6DC;
+  --primario-suave: #2E3A4C;
+  --positivo: #8AA891;
+  --atencion: #D9A45B;
+  --atencion-fondo: #3A3126;
+  --alerta: #D08A7B;
+  --alerta-fondo: #3A2B27;
+  --madera: #B99D7B;
+  --gris-calido: #8C857B;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 * { box-sizing: border-box; }
@@ -44,14 +55,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .res-numero, .hanko {
+h1, h2, h3, .res-numero, .res-numero-med, .hanko {
   font-family: "Shippori Mincho", "Inter", serif;
   font-weight: 500;
 }
 
 /* ── Encabezado ── */
 .site-header {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 32px 24px 8px;
   display: flex;
@@ -69,22 +80,22 @@ h1, h2, h3, .res-numero, .hanko {
   justify-content: center;
   width: 52px; height: 52px;
   border-radius: 50%;
-  background: var(--terracota);
+  background: var(--primario);
   color: var(--superficie);
   font-size: 1.5rem;
   flex-shrink: 0;
   box-shadow: var(--sombra);
 }
 
-.site-header h1 { margin: 0; font-size: 1.65rem; letter-spacing: 0.01em; }
-.tagline { margin: 0; color: var(--texto-suave); font-size: 0.9rem; }
+.site-header h1 { margin: 0; font-size: 1.65rem; letter-spacing: 0.01em; white-space: nowrap; }
+.tagline { margin: 0; color: var(--texto-suave); font-size: 0.9rem; white-space: nowrap; }
 
-.header-controls { display: flex; gap: 12px; flex-wrap: wrap; }
+.header-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
 /* Interruptores segmentados */
 .segmented {
   display: inline-flex;
-  background: var(--arena);
+  background: var(--superficie-2);
   border: 1px solid var(--linea);
   border-radius: 999px;
   padding: 3px;
@@ -107,10 +118,26 @@ h1, h2, h3, .res-numero, .hanko {
   box-shadow: var(--sombra);
 }
 
+/* Botón de tema (sol/luna) */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--linea);
+  background: var(--superficie);
+  color: var(--texto);
+  cursor: pointer;
+  transition: border-color var(--transicion), color var(--transicion);
+}
+.icon-btn:hover { border-color: var(--primario); color: var(--primario); }
+.icon-btn svg { width: 20px; height: 20px; }
+
 /* Separador «ola» */
 .ola {
   display: block;
-  width: min(1100px, calc(100% - 48px));
+  width: min(1180px, calc(100% - 48px));
   height: 24px;
   margin: 8px auto 0;
   color: var(--linea);
@@ -120,25 +147,29 @@ h1, h2, h3, .res-numero, .hanko {
 
 /* Aviso de tasas */
 .aviso-tasas {
-  max-width: 1100px;
-  margin: 12px auto 0;
-  padding: 0 24px;
+  max-width: 1132px;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  background: var(--atencion-fondo);
+  border-left: 3px solid var(--atencion);
+  border-radius: 10px;
   color: var(--texto-suave);
   font-size: 0.82rem;
 }
-.aviso-tasas a { color: var(--salvia-oscuro); }
+.aviso-tasas a { color: var(--primario); font-weight: 500; }
 
 /* ── Layout ── */
 .layout {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 5fr);
-  gap: 32px;
+  grid-template-columns: minmax(440px, 5fr) minmax(0, 7fr);
+  gap: 24px;
   align-items: start;
 }
-.col-results { position: sticky; top: 24px; }
+.col-results { position: sticky; top: 24px; min-width: 0; }
+.col-form { min-width: 0; }
 
 /* ── Tarjetas ── */
 .card {
@@ -148,14 +179,15 @@ h1, h2, h3, .res-numero, .hanko {
   box-shadow: var(--sombra);
   padding: 28px;
 }
-.paso { margin-bottom: 24px; }
+.paso { margin-bottom: 20px; }
 
 .paso h2 {
   margin: 0 0 20px;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   display: flex;
   align-items: center;
   gap: 12px;
+  white-space: nowrap;
 }
 .paso .num {
   display: inline-flex;
@@ -167,12 +199,25 @@ h1, h2, h3, .res-numero, .hanko {
   color: var(--madera);
   font-size: 0.95rem;
   font-family: "Inter", sans-serif;
+  flex-shrink: 0;
 }
 
 /* ── Campos ── */
-.campo { margin-bottom: 20px; }
+.campo { margin-bottom: 20px; min-width: 0; }
 .campo:last-child { margin-bottom: 0; }
-.fila { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
+
+/* Fila de compra: cantidad 28% / precio 44% / moneda 28% */
+.fila-compra {
+  display: grid;
+  grid-template-columns: 28fr 44fr 28fr;
+  gap: 14px;
+}
+/* Fila de montos con moneda: monto 68% / moneda 32% */
+.fila-monto {
+  display: grid;
+  grid-template-columns: 68fr 32fr;
+  gap: 14px;
+}
 
 label, legend {
   display: flex;
@@ -181,52 +226,83 @@ label, legend {
   font-size: 0.88rem;
   font-weight: 500;
   margin-bottom: 6px;
+  white-space: nowrap;
 }
 legend { padding: 0; }
 fieldset { border: 0; margin: 0; padding: 0; }
-.sub-label { font-weight: 400; color: var(--texto-suave); margin-top: 12px; }
+.sub-label { font-weight: 400; color: var(--texto-suave); margin-top: 12px; white-space: normal; }
+.grid-locales label { white-space: normal; }
 
 input[type="text"], input[type="number"], select {
   width: 100%;
   font: inherit;
+  font-size: 1rem;
   color: var(--texto);
-  background: var(--fondo);
+  background: var(--superficie);
   border: 1px solid var(--linea);
   border-radius: 10px;
   padding: 11px 14px;
-  min-height: 44px;
+  min-height: 48px;
   transition: border-color var(--transicion), box-shadow var(--transicion);
 }
 input:hover, select:hover { border-color: var(--madera); }
-input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, a:focus-visible {
-  outline: 2px solid var(--salvia);
+input:focus-visible, select:focus-visible, button:focus-visible,
+summary:focus-visible, a:focus-visible {
+  outline: 2px solid var(--primario);
   outline-offset: 2px;
 }
-input.invalido { border-color: var(--terracota); }
+input.invalido { border-color: var(--alerta); }
 input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 
-.grupo-moneda { display: flex; gap: 8px; }
-.grupo-moneda input { flex: 1; }
-.grupo-moneda select { width: 92px; flex-shrink: 0; }
+/* Campo de dinero con prefijo de moneda dentro */
+.input-dinero {
+  display: flex;
+  align-items: center;
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  min-height: 48px;
+  transition: border-color var(--transicion);
+}
+.input-dinero:hover { border-color: var(--madera); }
+.input-dinero:focus-within {
+  outline: 2px solid var(--primario);
+  outline-offset: 2px;
+  border-color: var(--primario);
+}
+.input-dinero .prefijo {
+  padding-left: 14px;
+  padding-right: 6px;
+  color: var(--texto-suave);
+  font-size: 0.95em;
+  white-space: nowrap;
+}
+.input-dinero input {
+  border: 0;
+  background: transparent;
+  min-height: 46px;
+  padding-left: 0;
+}
+.input-dinero input:focus-visible { outline: none; }
+.input-dinero input.invalido { border-color: transparent; }
+.input-dinero.invalido { border-color: var(--alerta); }
 
-.grupo-pct { display: flex; align-items: center; gap: 8px; }
-.grupo-pct input { max-width: 140px; }
-.unidad { color: var(--texto-suave); }
-
+/* Tipo de cambio: una línea a todo el ancho dentro de la tarjeta */
 .tc-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: var(--arena);
-  border-radius: 10px;
-  font-size: 0.82rem;
   flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  font-size: 0.85rem;
 }
 .tc-row label { margin: 0; font-weight: 400; }
-.tc-row input { width: 90px; min-height: 40px; padding: 6px 10px; }
-.tc-nota { color: var(--texto-suave); }
+.tc-row input { width: 110px; min-height: 44px; padding: 6px 12px; }
+.tc-nota { color: var(--texto-suave); font-size: 0.82rem; }
 
 .seg-seguro { margin-bottom: 12px; }
 
@@ -237,26 +313,26 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
   display: inline-block;
   margin-top: 8px;
   font-size: 0.82rem;
-  color: var(--salvia-oscuro);
+  color: var(--primario);
 }
 
-/* Botón de ayuda «?» */
+/* Botón de ayuda «?»: 24px alineado a la etiqueta */
 .ayuda {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px; height: 22px;
-  min-width: 22px; min-height: 22px;
+  width: 24px; height: 24px;
+  min-width: 24px; min-height: 24px;
   border-radius: 50%;
   border: 1px solid var(--linea);
   background: transparent;
   color: var(--texto-suave);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   cursor: pointer;
   padding: 0;
   transition: border-color var(--transicion), color var(--transicion);
 }
-.ayuda:hover, .ayuda[aria-expanded="true"] { border-color: var(--salvia); color: var(--salvia-oscuro); }
+.ayuda:hover, .ayuda[aria-expanded="true"] { border-color: var(--primario); color: var(--primario); }
 
 .tooltip {
   position: absolute;
@@ -284,10 +360,10 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
   cursor: pointer;
   transition: background var(--transicion), border-color var(--transicion), transform var(--transicion);
 }
-.btn:hover { border-color: var(--salvia); }
+.btn:hover { border-color: var(--primario); color: var(--primario); }
 .btn:active { transform: translateY(1px); }
-.btn-prim { background: var(--salvia); border-color: var(--salvia); color: #fff; }
-.btn-prim:hover { background: var(--salvia-oscuro); border-color: var(--salvia-oscuro); }
+.btn-prim { background: var(--primario); border-color: var(--primario); color: #fff; }
+.btn-prim:hover { background: var(--primario-oscuro); border-color: var(--primario-oscuro); color: #fff; }
 
 .acciones-form { display: flex; gap: 12px; flex-wrap: wrap; }
 .acciones-res { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
@@ -296,39 +372,45 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 .res-titulo { margin: 0 0 16px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
 
 .vacio { color: var(--texto-suave); text-align: center; padding: 24px 8px; }
+.vacio-ilu { display: block; margin: 0 auto 16px; color: var(--madera); opacity: 0.85; }
 .vacio-titulo { color: var(--texto); font-weight: 600; margin-bottom: 4px; }
+.vacio .btn { margin-top: 14px; }
 
 .errores {
-  background: var(--arena);
-  border-left: 3px solid var(--terracota);
+  background: var(--alerta-fondo);
+  border-left: 3px solid var(--alerta);
   border-radius: 10px;
   padding: 14px 18px;
   font-size: 0.9rem;
 }
-.errores p { margin: 0 0 6px; font-weight: 500; }
+.errores p { margin: 0 0 6px; font-weight: 500; color: var(--alerta); }
 .errores ul { margin: 0; padding-left: 20px; color: var(--texto-suave); }
 
+/* (a) Costo por unidad y precio sugerido */
 .res-principal { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .res-bloque {
-  background: var(--fondo);
+  background: var(--primario-suave);
   border: 1px solid var(--linea);
   border-radius: var(--radio);
   padding: 18px;
 }
-.res-precio { border-color: var(--salvia); }
 .res-label { margin: 0 0 4px; font-size: 0.85rem; color: var(--texto-suave); font-weight: 500; }
-.res-numero { margin: 0; font-size: 1.9rem; color: var(--terracota); }
-.res-numero-med { margin: 0; font-size: 1.35rem; font-family: "Shippori Mincho", serif; }
+.res-numero { margin: 0; font-size: 1.9rem; color: var(--primario-oscuro); }
 .res-sub { margin: 4px 0 0; font-size: 0.82rem; color: var(--texto-suave); }
+.res-markup { color: var(--positivo); font-weight: 500; }
 
+/* (b) Desembolso en aduana */
 .res-desembolso {
   margin-top: 16px;
   padding: 16px 18px;
-  background: var(--arena);
+  background: var(--superficie-2);
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--madera);
   border-radius: var(--radio);
 }
+.res-numero-med { margin: 0; font-size: 1.35rem; color: var(--texto); }
 
-/* Barra de desglose */
+/* (c) Barra de desglose: índigo, salvia, madera, gris cálido */
 .barra {
   display: flex;
   height: 26px;
@@ -338,10 +420,10 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
   margin: 8px 0 12px;
 }
 .seg { transition: width var(--transicion); }
-.seg-producto { background: var(--salvia); }
-.seg-flete { background: var(--madera); }
-.seg-impuestos { background: var(--terracota); }
-.seg-locales { background: var(--arena); }
+.seg-producto { background: var(--primario); }
+.seg-flete { background: var(--positivo); }
+.seg-impuestos { background: var(--madera); }
+.seg-locales { background: var(--gris-calido); }
 
 .leyenda { list-style: none; margin: 0 0 16px; padding: 0; font-size: 0.85rem; }
 .leyenda li { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--texto-suave); }
@@ -376,7 +458,7 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 .detalle-dl dt.total, .detalle-dl dd.total { font-weight: 600; color: var(--texto); border-top: 1px solid var(--linea); padding-top: 6px; }
 
 /* Guardados */
-.guardados-card { margin-top: 24px; }
+.guardados-card { margin-top: 20px; }
 .lista-guardados { list-style: none; margin: 0; padding: 0; }
 .lista-guardados li {
   display: flex; align-items: center; gap: 10px;
@@ -394,12 +476,12 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
   bottom: 20px; left: 50%;
   transform: translateX(-50%);
   z-index: 40;
-  box-shadow: 0 4px 16px rgba(43, 42, 40, 0.25);
+  box-shadow: 0 4px 16px rgba(42, 45, 52, 0.3);
 }
 
 /* Pie */
 .site-footer {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 24px 24px 48px;
   color: var(--texto-suave);
@@ -410,16 +492,18 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 /* Modo simple: ocultar avanzado */
 body:not(.modo-avanzado) .advanced-only { display: none !important; }
 
-/* ── Responsive ── */
-@media (max-width: 860px) {
+/* ── Responsive: una columna en celular ── */
+@media (max-width: 720px) {
   .layout { grid-template-columns: 1fr; }
   .col-results { position: static; }
   .flotante { display: block; }
   .res-principal { grid-template-columns: 1fr; }
+  .fila-compra { grid-template-columns: 1fr 1fr; }
+  .fila-compra .c-mon { grid-column: 1 / -1; }
 }
 
 @media (max-width: 480px) {
-  .fila, .grid-locales { grid-template-columns: 1fr; }
+  .fila-compra, .fila-monto, .grid-locales { grid-template-columns: 1fr; }
   .card { padding: 20px; }
   .site-header { padding-top: 20px; }
 }
@@ -437,7 +521,7 @@ body:not(.modo-avanzado) .advanced-only { display: none !important; }
   .layout { display: block; padding: 0; }
   .col-results { position: static; }
   .card { border: 0; box-shadow: none; padding: 0; }
-  .res-bloque, .res-desembolso { border: 1px solid #ccc; background: #fff; }
+  .res-bloque, .res-desembolso { border: 1px solid #ccc; }
   .detalle { display: block; }
   .detalle > * { display: block; }
   .detalle summary::marker { content: ""; }

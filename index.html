@@ -21,6 +21,15 @@
     </div>
   </div>
   <div class="header-controls">
+    <button type="button" id="btn-tema" class="icon-btn" aria-label="Cambiar tema">
+      <svg id="icono-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.5"/>
+        <path d="M12 2.5v2.5M12 19v2.5M2.5 12h2.5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>
+      </svg>
+      <svg id="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" hidden aria-hidden="true">
+        <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>
+      </svg>
+    </button>
     <div class="segmented" role="group" aria-label="Idioma / Language">
       <button type="button" id="lang-es" class="seg-btn" aria-pressed="true">ES</button>
       <button type="button" id="lang-en" class="seg-btn" aria-pressed="false">EN</button>
@@ -59,29 +68,33 @@
         <input type="text" id="f_pais" data-i18n-ph="phPais" placeholder="Ej.: China" autocomplete="off">
       </div>
 
-      <div class="fila">
-        <div class="campo">
+      <div class="fila-compra">
+        <div class="campo c-cant">
           <label for="f_cantidad"><span data-i18n="lCantidad">Cantidad</span></label>
           <input type="number" id="f_cantidad" min="1" step="1" inputmode="numeric" required>
         </div>
-        <div class="campo">
+        <div class="campo c-precio">
           <label for="f_precio">
             <span data-i18n="lPrecioFob">Precio por unidad (FOB)</span>
             <button type="button" class="ayuda" data-help="fob" aria-label="?">?</button>
           </label>
-          <div class="grupo-moneda">
+          <div class="input-dinero">
+            <span class="prefijo" id="prefijo-precio" aria-hidden="true">US$</span>
             <input type="number" id="f_precio" min="0" step="any" inputmode="decimal" required>
-            <select id="f_moneda" aria-label="Moneda">
-              <option value="USD">USD</option><option value="EUR">EUR</option>
-              <option value="CNY">CNY</option><option value="PEN">PEN</option>
-            </select>
-          </div>
-          <div class="tc-row" id="tc-row-fob" hidden>
-            <label for="tc_fob"><span class="tc-label"></span></label>
-            <input type="number" id="tc_fob" min="0" step="any" inputmode="decimal">
-            <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
           </div>
         </div>
+        <div class="campo c-mon">
+          <label for="f_moneda"><span data-i18n="lMoneda">Moneda</span></label>
+          <select id="f_moneda">
+            <option value="USD">USD</option><option value="EUR">EUR</option>
+            <option value="CNY">CNY</option><option value="PEN">PEN</option>
+          </select>
+        </div>
+      </div>
+      <div class="tc-row" id="tc-row-fob" hidden>
+        <label for="tc_fob"><span class="tc-label"></span></label>
+        <input type="number" id="tc_fob" min="0" step="any" inputmode="decimal">
+        <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
       </div>
     </section>
 
@@ -93,18 +106,21 @@
           <span data-i18n="lFlete">Flete internacional (total)</span>
           <button type="button" class="ayuda" data-help="incoterm" aria-label="?">?</button>
         </label>
-        <div class="grupo-moneda">
-          <input type="number" id="f_flete" min="0" step="any" inputmode="decimal">
+        <div class="fila-monto">
+          <div class="input-dinero">
+            <span class="prefijo" id="prefijo-flete" aria-hidden="true">US$</span>
+            <input type="number" id="f_flete" min="0" step="any" inputmode="decimal">
+          </div>
           <select id="f_moneda_flete" aria-label="Moneda">
             <option value="USD">USD</option><option value="EUR">EUR</option>
             <option value="CNY">CNY</option><option value="PEN">PEN</option>
           </select>
         </div>
-        <div class="tc-row" id="tc-row-flete" hidden>
-          <label for="tc_flete"><span class="tc-label"></span></label>
-          <input type="number" id="tc_flete" min="0" step="any" inputmode="decimal">
-          <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
-        </div>
+      </div>
+      <div class="tc-row" id="tc-row-flete" hidden>
+        <label for="tc_flete"><span class="tc-label"></span></label>
+        <input type="number" id="tc_flete" min="0" step="any" inputmode="decimal">
+        <small class="tc-nota" data-i18n="tcNota">Referencial, actualícelo</small>
       </div>
 
       <div class="campo advanced-only">
@@ -117,8 +133,11 @@
         </div>
         <div id="seguro-manual-box" hidden>
           <label for="f_seguro" class="sub-label"><span data-i18n="lMontoSeguro">Monto del seguro</span></label>
-          <div class="grupo-moneda">
-            <input type="number" id="f_seguro" min="0" step="any" inputmode="decimal">
+          <div class="fila-monto">
+            <div class="input-dinero">
+              <span class="prefijo" id="prefijo-seguro" aria-hidden="true">US$</span>
+              <input type="number" id="f_seguro" min="0" step="any" inputmode="decimal">
+            </div>
             <select id="f_moneda_seguro" aria-label="Moneda">
               <option value="USD">USD</option><option value="EUR">EUR</option>
               <option value="CNY">CNY</option><option value="PEN">PEN</option>
@@ -164,22 +183,30 @@
           <span data-i18n="lPercepcionFija">o monto fijo por unidad (S/)</span>
           <button type="button" class="ayuda" data-help="percepcionFija" aria-label="?">?</button>
         </label>
-        <input type="number" id="f_percepcion_fija" min="0" step="any" inputmode="decimal" placeholder="0.00">
+        <div class="input-dinero">
+          <span class="prefijo" aria-hidden="true">S/</span>
+          <input type="number" id="f_percepcion_fija" min="0" step="any" inputmode="decimal" placeholder="0.00">
+        </div>
       </div>
 
       <fieldset class="campo advanced-only">
         <legend><span data-i18n="lGastosLocales">Gastos locales (en soles)</span></legend>
         <div class="grid-locales">
           <div class="campo"><label for="f_agente" data-i18n="lAgente">Agente de aduana</label>
-            <input type="number" id="f_agente" min="0" step="any" inputmode="decimal"></div>
+            <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>
+              <input type="number" id="f_agente" min="0" step="any" inputmode="decimal"></div></div>
           <div class="campo"><label for="f_desaduanaje" data-i18n="lDesaduanaje">Desaduanaje y gastos portuarios</label>
-            <input type="number" id="f_desaduanaje" min="0" step="any" inputmode="decimal"></div>
+            <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>
+              <input type="number" id="f_desaduanaje" min="0" step="any" inputmode="decimal"></div></div>
           <div class="campo"><label for="f_almacenaje" data-i18n="lAlmacenaje">Almacenaje</label>
-            <input type="number" id="f_almacenaje" min="0" step="any" inputmode="decimal"></div>
+            <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>
+              <input type="number" id="f_almacenaje" min="0" step="any" inputmode="decimal"></div></div>
           <div class="campo"><label for="f_transporte" data-i18n="lTransporte">Transporte local</label>
-            <input type="number" id="f_transporte" min="0" step="any" inputmode="decimal"></div>
+            <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>
+              <input type="number" id="f_transporte" min="0" step="any" inputmode="decimal"></div></div>
           <div class="campo"><label for="f_otros" data-i18n="lOtros">Otros</label>
-            <input type="number" id="f_otros" min="0" step="any" inputmode="decimal"></div>
+            <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>
+              <input type="number" id="f_otros" min="0" step="any" inputmode="decimal"></div></div>
         </div>
       </fieldset>
 
@@ -216,8 +243,17 @@
       </h2>
 
       <div id="estado-vacio" class="vacio">
+        <svg class="vacio-ilu" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 42 L60 24 L100 42 L60 60 Z"/>
+          <path d="M20 42 V68 L60 86 V60"/>
+          <path d="M100 42 V68 L60 86"/>
+          <path d="M40 33 L80 51"/>
+          <path d="M60 60 V86"/>
+          <path d="M48 54 L60 47 L72 54" opacity="0.6"/>
+        </svg>
         <p class="vacio-titulo" data-i18n="vacioTitulo">Aquí verá su resultado</p>
         <p data-i18n="vacioTexto">Complete «1. Su compra» y el cálculo aparecerá mientras escribe.</p>
+        <button type="button" id="btn-ejemplo-2" class="btn btn-prim" data-i18n="btnEjemplo">Cargar ejemplo</button>
       </div>
 
       <div id="estado-errores" class="errores" hidden>
@@ -235,7 +271,7 @@
             <p class="res-label" data-i18n="resPrecioSugerido">Precio de venta sugerido</p>
             <p class="res-numero" id="r_precio">S/ 0.00</p>
             <p class="res-sub"><span id="r_precio_igv"></span> <span data-i18n="resConIgv">con IGV incluido</span></p>
-            <p class="res-sub" id="r_markup"></p>
+            <p class="res-sub res-markup" id="r_markup"></p>
           </div>
         </div>
 

@@ -114,6 +114,7 @@
       btnMisCalculos: 'Mis cálculos',
       btnBorrar: 'Borrar todo',
       btnVerResultado: 'Ver resultado',
+      btnTema: 'Cambiar a modo claro u oscuro',
 
       vacioTitulo: 'Aquí verá su resultado',
       vacioTexto: 'Complete «1. Su compra» y el cálculo aparecerá mientras escribe. O cargue el ejemplo para verlo funcionando.',
@@ -254,6 +255,7 @@
       btnMisCalculos: 'My calculations',
       btnBorrar: 'Clear all',
       btnVerResultado: 'See result',
+      btnTema: 'Switch between light and dark mode',
 
       vacioTitulo: 'Your result will appear here',
       vacioTexto: 'Fill in "1. Your purchase" and the calculation appears as you type. Or load the example to see it work.',

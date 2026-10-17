@@ -13,9 +13,45 @@
   let tasas = Calc.TASAS_DEFECTO;
   let lang = 'es';
   let modo = 'simple';
+  let tema = 'claro';
   let seguroModo = 'auto';
   let recuperaIgv = true;
   const fxUsuario = {}; // tipos de cambio editados por el usuario
+
+  const SIMBOLO = { USD: 'US$', EUR: '€', CNY: '¥', PEN: 'S/' };
+  // Campos que se formatean con separador de miles al salir (blur)
+  const CAMPOS_DINERO = {
+    f_cantidad: 0, f_precio: 2, f_flete: 2, f_seguro: 2,
+    f_agente: 2, f_desaduanaje: 2, f_almacenaje: 2,
+    f_transporte: 2, f_otros: 2, f_percepcion_fija: 2
+  };
+
+  // Parseo tolerante: acepta "1,234.56", "1234,56" y "3,75"
+  function parseNumero(v) {
+    let s = String(v).trim().replace(/\s/g, '');
+    if (!s) return NaN;
+    const hasC = s.includes(','), hasP = s.includes('.');
+    if (hasC && hasP) {
+      s = s.lastIndexOf(',') > s.lastIndexOf('.')
+        ? s.replace(/\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else if (hasC) {
+      s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
+    }
+    return Number(s);
+  }
+
+  function updatePrefijos() {
+    $('prefijo-precio').textContent = SIMBOLO[$('f_moneda').value];
+    $('prefijo-flete').textContent = SIMBOLO[$('f_moneda_flete').value];
+    $('prefijo-seguro').textContent = SIMBOLO[$('f_moneda_seguro').value];
+  }
+
+  function aplicarTema() {
+    document.documentElement.dataset.tema = tema;
+    $('icono-sol').hidden = tema === 'oscuro';
+    $('icono-luna').hidden = tema !== 'oscuro';
+  }
 
   const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k;
   const tpl = (s, m) => String(s).replace(/\{(\w+)\}/g, (_, k) => (m[k] != null ? m[k] : '{' + k + '}'));
@@ -39,6 +75,7 @@
     const prefs = store('getPrefs');
     if (prefs.lang) lang = prefs.lang;
     if (prefs.modo) modo = prefs.modo;
+    if (prefs.tema) tema = prefs.tema;
 
     try {
       const r = await fetch('config/tasas.json');
@@ -47,6 +84,7 @@
 
     poblarSelects();
     aplicarModo();
+    aplicarTema();
     aplicarIdioma();
     enlazarEventos();
     sincronizarToggleSeguro();
@@ -99,6 +137,7 @@
     $('aviso-link').textContent = t('avisoSunatLink');
     $('aviso-link').href = tasas.sunat_arancel_url || '#';
     $('adv-ayuda').href = tasas.sunat_arancel_url || '#';
+    $('btn-tema').setAttribute('aria-label', t('btnTema'));
     actualizarTcLabels();
     poblarSelects();
     recalc();
@@ -134,6 +173,7 @@
       if (!el.hidden) $(input).value = tcDe(m);
     });
     actualizarTcLabels();
+    updatePrefijos();
   }
 
   function actualizarTcLabels() {
@@ -147,7 +187,7 @@
   /* ── Lectura del formulario ── */
   function num(id) {
     const v = $(id).value.trim();
-    return v === '' ? NaN : Calc.num(v);
+    return v === '' ? NaN : parseNumero(v);
   }
 
   function leerEntrada() {
@@ -156,7 +196,7 @@
     const fx = {};
     tcRows.forEach(({ select, input }) => {
       const m = $(select).value;
-      fx[m] = m === 'PEN' ? 1 : (Calc.num($(input).value) || NaN);
+      fx[m] = m === 'PEN' ? 1 : (parseNumero($(input).value) || NaN);
     });
     return {
       cantidad: num('f_cantidad'),
@@ -529,7 +569,7 @@
       el.addEventListener('change', recalc);
     });
 
-    // Monedas → mostrar/ocultar tipo de cambio
+    // Monedas → mostrar/ocultar tipo de cambio y prefijo
     tcRows.forEach(({ select }) => {
       $(select).addEventListener('change', actualizarTcRows);
     });
@@ -537,8 +577,23 @@
     // Tipos de cambio editados se recuerdan por moneda
     tcRows.forEach(({ select, input }) => {
       $(input).addEventListener('input', () => {
-        fxUsuario[$(select).value] = Calc.num($(input).value);
+        fxUsuario[$(select).value] = parseNumero($(input).value);
       });
+    });
+
+    // Separador de miles al salir del campo
+    Object.entries(CAMPOS_DINERO).forEach(([id, dec]) => {
+      $(id).addEventListener('blur', () => {
+        const n = parseNumero($(id).value);
+        if (Number.isFinite(n)) $(id).value = fmtNum(n, dec);
+      });
+    });
+
+    // Tema claro/oscuro (manual, persistente)
+    $('btn-tema').addEventListener('click', () => {
+      tema = tema === 'oscuro' ? 'claro' : 'oscuro';
+      store('setPrefs', Object.assign(store('getPrefs'), { lang, modo, tema }));
+      aplicarTema();
     });
 
     // Ad valorem personalizado
@@ -568,6 +623,7 @@
 
     // Acciones
     $('btn-ejemplo').addEventListener('click', cargarEjemplo);
+    $('btn-ejemplo-2').addEventListener('click', cargarEjemplo);
     $('btn-borrar').addEventListener('click', borrarTodo);
     $('btn-copiar').addEventListener('click', async () => {
       const texto = resumenTexto();
