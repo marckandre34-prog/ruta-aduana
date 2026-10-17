@@ -20,8 +20,8 @@
   const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k;
   const tpl = (s, m) => String(s).replace(/\{(\w+)\}/g, (_, k) => (m[k] != null ? m[k] : '{' + k + '}'));
 
-  const fmtMoney = (n) => new Intl.NumberFormat(lang === 'es' ? 'es-PE' : 'en-US',
-    { style: 'currency', currency: 'PEN' }).format(n);
+  const fmtMoney = (n) => 'S/ ' + new Intl.NumberFormat(lang === 'es' ? 'es-PE' : 'en-US',
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
   const fmtNum = (n, d = 2) => new Intl.NumberFormat(lang === 'es' ? 'es-PE' : 'en-US',
     { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
 
