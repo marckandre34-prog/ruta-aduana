@@ -10,7 +10,8 @@
   const LS_PREF = 'rutaAduana.prefs';
 
   /* ── Estado ── */
-  let tasas = Calc.TASAS_DEFECTO;
+  let tasas = Calc.TASAS_DEFECTO; // ya normalizada
+  let tasasRaw = null;            // config/rates.json crudo (fuentes y fechas)
   let lang = 'es';
   let modo = 'simple';
   let tema = 'claro';
@@ -53,6 +54,57 @@
     $('icono-luna').hidden = tema !== 'oscuro';
   }
 
+  /* ── Gastos locales: valores por defecto estimados (config) ── */
+  function aplicarDefectosLocales() {
+    const d = tasas.gastos_locales_default || {};
+    ['agente', 'desaduanaje', 'almacenaje', 'transporte', 'otros'].forEach(k => {
+      const el = $('f_' + k);
+      if (el && el.value.trim() === '' && typeof d[k] === 'number') {
+        el.value = d[k] === 0 ? '' : fmtNum(d[k], 0);
+      }
+    });
+  }
+
+  /* ── Tipo de cambio automático (mejor esfuerzo, siempre editable) ──
+     SUNAT no habilita CORS; se intenta el espejo apis.net.pe y luego
+     open.er-api (referencial). Si todo falla, queda el valor manual. */
+  async function cargarTCAuto() {
+    const info = $('tc-auto-info');
+    if (!info) return;
+    const fechaHoy = () => new Date().toLocaleDateString(lang === 'es' ? 'es-PE' : 'en-US');
+    const fuentes = [
+      {
+        url: 'https://api.apis.net.pe/v1/tipo-de-cambio-sunat',
+        leer: d => Number.isFinite(d && d.venta)
+          ? { valor: d.venta, fecha: fechaHoy(), fuente: 'SUNAT (vía apis.net.pe)' } : null
+      },
+      {
+        url: 'https://open.er-api.com/v6/latest/USD',
+        leer: d => d && d.rates && Number.isFinite(d.rates.PEN)
+          ? { valor: d.rates.PEN, fecha: d.time_last_update_utc || fechaHoy(), fuente: 'open.er-api.com (referencial)' } : null
+      }
+    ];
+    for (const f of fuentes) {
+      try {
+        const r = await fetch(f.url);
+        if (!r.ok) continue;
+        const res = f.leer(await r.json());
+        if (res) {
+          if (fxUsuario.USD == null) {
+            tasas.tipo_cambio_referencial.USD = res.valor;
+            actualizarTcRows();
+            recalc();
+          }
+          info.textContent = tpl(t('tcAutoOk'), { valor: fmtNum(res.valor, 3), fuente: res.fuente, fecha: res.fecha });
+          info.hidden = false;
+          return;
+        }
+      } catch (e) { /* intenta la siguiente fuente */ }
+    }
+    info.textContent = t('tcAutoFail');
+    info.hidden = false;
+  }
+
   const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k;
   const tpl = (s, m) => String(s).replace(/\{(\w+)\}/g, (_, k) => (m[k] != null ? m[k] : '{' + k + '}'));
 
@@ -78,9 +130,15 @@
     if (prefs.tema) tema = prefs.tema;
 
     try {
-      const r = await fetch('config/tasas.json');
-      if (r.ok) tasas = Object.assign({}, Calc.TASAS_DEFECTO, await r.json());
+      const r = await fetch('config/rates.json');
+      if (r.ok) {
+        tasasRaw = await r.json();
+        tasas = Calc.normalizarTasas(tasasRaw);
+      }
     } catch (e) { /* file:// sin servidor: se usan TASAS_DEFECTO */ }
+
+    aplicarDefectosLocales();
+    cargarTCAuto(); // mejor esfuerzo, no bloquea
 
     poblarSelects();
     aplicarModo();
@@ -98,7 +156,9 @@
     const adv = $('f_adv');
     const prev = adv.value;
     adv.innerHTML = '';
-    const niveles = modo === 'avanzado' ? tasas.ad_valorem_opciones : tasas.ad_valorem_opciones_simple;
+    const niveles = modo === 'avanzado'
+      ? tasas.ad_valorem_opciones
+      : tasas.ad_valorem_opciones.filter(v => v !== 0.04);
     niveles.forEach((v) => {
       const op = document.createElement('option');
       op.value = String(v * 100);
@@ -133,10 +193,10 @@
     document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
     $('lang-es').setAttribute('aria-pressed', String(lang === 'es'));
     $('lang-en').setAttribute('aria-pressed', String(lang === 'en'));
-    $('aviso-texto').textContent = tpl(t('avisoTasas'), { fecha: tasas.vigente_a_fecha || '—' }) + ' ';
+    $('aviso-texto').textContent = tpl(t('avisoTasas'), { fecha: (tasasRaw && tasasRaw.vigente_a_fecha) || '—' }) + ' ';
     $('aviso-link').textContent = t('avisoSunatLink');
-    $('aviso-link').href = tasas.sunat_arancel_url || '#';
-    $('adv-ayuda').href = tasas.sunat_arancel_url || '#';
+    $('aviso-link').href = (tasasRaw && tasasRaw.sunat_arancel_url) || '#';
+    $('adv-ayuda').href = (tasasRaw && tasasRaw.sunat_arancel_url) || '#';
     $('btn-tema').setAttribute('aria-label', t('btnTema'));
     actualizarTcLabels();
     poblarSelects();
@@ -209,6 +269,7 @@
       monedaSeguro: $('f_moneda_seguro').value,
       adValoremPct,
       iscPct: modo === 'avanzado' && Number.isFinite(num('f_isc')) ? num('f_isc') : 0,
+      antidumpingPct: modo === 'avanzado' && Number.isFinite(num('f_antidumping')) ? num('f_antidumping') : 0,
       percepcionPct: parseFloat($('f_percepcion').value) || 0,
       percepcionFija: Number.isFinite(num('f_percepcion_fija')) ? num('f_percepcion_fija') : 0,
       gastosLocales: modo === 'avanzado' ? {
@@ -225,7 +286,7 @@
   const campoDeError = {
     cantidad: 'f_cantidad', precioFob: 'f_precio', flete: 'f_flete', seguro: 'f_seguro',
     adValorem: 'f_adv_custom', isc: 'f_isc', percepcion: 'f_percepcion',
-    percepcionFija: 'f_percepcion_fija', margen: 'f_margen',
+    percepcionFija: 'f_percepcion_fija', margen: 'f_margen', antidumping: 'f_antidumping',
     tc_USD: 'tc_fob', tc_EUR: 'tc_fob', tc_CNY: 'tc_fob',
     local_agente: 'f_agente', local_desaduanaje: 'f_desaduanaje',
     local_almacenaje: 'f_almacenaje', local_transporte: 'f_transporte', local_otros: 'f_otros'
@@ -233,7 +294,7 @@
   const nombreCampo = {
     cantidad: 'lCantidad', precioFob: 'lPrecioFob', flete: 'lFlete', seguro: 'lMontoSeguro',
     adValorem: 'lAdValorem', isc: 'lIsc', percepcion: 'lPercepcion',
-    percepcionFija: 'lPercepcionFija', margen: 'lMargen',
+    percepcionFija: 'lPercepcionFija', margen: 'lMargen', antidumping: 'lAntidumping',
     tc_USD: 'lPrecioFob', tc_EUR: 'lPrecioFob', tc_CNY: 'lPrecioFob',
     local_agente: 'lAgente', local_desaduanaje: 'lDesaduanaje',
     local_almacenaje: 'lAlmacenaje', local_transporte: 'lTransporte', local_otros: 'lOtros'
@@ -359,6 +420,7 @@
     const frases = t('pasos').map(s => tpl(s, m));
     const finales = [];
     if (r.isc > 0) finales.push({ idx: 3, txt: tpl(t('pasoIsc'), { pct: fmtNum(entrada.iscPct, 1), monto: fmtMoney(r.isc) }) });
+    if (r.antidumping > 0) finales.push({ idx: 3.4, txt: tpl(t('pasoAntidumping'), { pct: fmtNum(entrada.antidumpingPct, 1), monto: fmtMoney(r.antidumping) }) });
     finales.push({ idx: 7, txt: tpl(r.recuperaIgv ? t('pasoRecupera') : t('pasoNoRecupera'), { monto: fmtMoney(r.igv + r.ipm) }) });
     finales.sort((a, b) => a.idx - b.idx).reverse().forEach(f => frases.splice(f.idx, 0, f.txt));
     frases.forEach(s => {
@@ -378,6 +440,7 @@
       ['CIF — ' + (lang === 'es' ? 'valor en aduana' : 'customs value'), r.cif],
       ['Ad valorem (' + fmtNum(entrada.adValoremPct, 1) + '%)', r.adValorem],
       ['ISC (' + fmtNum(entrada.iscPct || 0, 1) + '%)', r.isc],
+      ...(r.antidumping > 0 ? [[t('lAntidumping') + ' (' + fmtNum(entrada.antidumpingPct, 1) + '%)', r.antidumping]] : []),
       ['IGV (16%)', r.igv],
       ['IPM (2%)', r.ipm],
       [t('lPercepcion') + ' (' + fmtNum(entrada.percepcionPct, 1) + '%' +
@@ -529,8 +592,10 @@
     $('f_isc').value = '0';
     $('f_moneda').value = $('f_moneda_flete').value = $('f_moneda_seguro').value = 'USD';
     $('f_adv_custom').hidden = true;
+    $('f_antidumping').value = '0';
     seguroModo = 'auto'; recuperaIgv = true;
     Object.keys(fxUsuario).forEach(k => delete fxUsuario[k]);
+    aplicarDefectosLocales();
     sincronizarToggleSeguro(); sincronizarToggleRecupera();
     actualizarTcRows(); recalc();
   }

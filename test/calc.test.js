@@ -109,13 +109,15 @@ test('D2) Escenarios de tipo de cambio escalan solo lo importado', () => {
     fx: { USD: 4, PEN: 1 }
   });
   const esc = Calc.escenarios(entrada, TASAS);
-  assert.deepEqual(esc.map(s => s.delta), [-0.03, 0, 0.05, 0.10]);
+  assert.deepEqual(esc.map(s => s.delta), [-0.03, 0, 0.03, 0.05, 0.10]);
   // -3%: FOB 2000*0.97 = 1940 + 100 local = 2040 -> 20.40 por unidad
   assert.equal(r2(esc[0].costoUnitario), 20.40);
   assert.equal(r2(esc[1].costoUnitario), 21.00);
+  // +3%: FOB 2000*1.03 = 2060 + 100 local = 2160 -> 21.60
+  assert.equal(r2(esc[2].costoUnitario), 21.60);
   // +10%: 2200 + 100 = 2300 -> 23.00
-  assert.equal(r2(esc[3].costoUnitario), 23.00);
-  assert.ok(esc[3].precioSinIgv > esc[0].precioSinIgv);
+  assert.equal(r2(esc[4].costoUnitario), 23.00);
+  assert.ok(esc[4].precioSinIgv > esc[0].precioSinIgv);
 });
 
 test('E) Validaciones de entradas inválidas', () => {
@@ -161,4 +163,69 @@ test('Precio sugerido desde margen sobre el precio', () => {
   assert.equal(r2(r.precioSinIgv), 1250.00);
   assert.equal(r2(r.markupEquiv), 0.25);
   assert.equal(r2(r.precioConIgv), 1475.00);            // +18% (IGV+IPM)
+});
+
+test('F) Antidumping: entra a la base del IGV y a la base de la percepción', () => {
+  // CIF 1000, adv 0, antidumping 20% -> AD=200; base IGV=1200; IGV=192; IPM=24
+  // tributos = 200+192+24 = 416; percepción 3.5% sobre 1416 = 49.56
+  const r = Calc.calcular(base({ precioFob: 1000, antidumpingPct: 20, percepcionPct: 3.5 }), TASAS);
+  assert.equal(r.ok, true);
+  assert.equal(r2(r.antidumping), 200.00);
+  assert.equal(r2(r.baseIgv), 1200.00);
+  assert.equal(r2(r.igv), 192.00);
+  assert.equal(r2(r.ipm), 24.00);
+  assert.equal(r2(r.tributos), 416.00);
+  assert.equal(r2(r.percepcion), 49.56);
+  // El antidumping es costo real (no se recupera)
+  assert.equal(r2(r.costoPuesto), 1200.00);
+});
+
+test('G) La percepción incluye el ISC en su base (R.S. 203-2003)', () => {
+  // CIF 1000, adv 6% -> 60; ISC 10% sobre 1060 -> 106; base IGV 1166
+  // IGV 186.56, IPM 23.32, tributos 375.88
+  // percepción 3.5% sobre (1000 + 375.88) = 1375.88 -> 48.1558 -> 48.16
+  const r = Calc.calcular(base({ precioFob: 1000, adValoremPct: 6, iscPct: 10, percepcionPct: 3.5 }), TASAS);
+  assert.equal(r.ok, true);
+  assert.equal(r2(r.tributos), 375.88);
+  assert.equal(r2(r.percepcion), 48.16);
+  // Desembolso = tributos + percepción (lo que se paga en aduana)
+  assert.equal(r2(r.desembolsoAduana), 424.04);
+  // Costo real con RUC: no incluye IGV/IPM ni percepción
+  assert.equal(r2(r.costoPuesto), 1166.00);
+});
+
+test('H) Redondeo: precisión interna completa, 2 decimales solo al mostrar', () => {
+  // CIF 31.80 + adv 6% (1.908) -> base 33.708 -> IGV = 33.708 * 0.16 = 5.39328
+  // (valor crudo sin redondear; la vista muestra 5.39)
+  const r = Calc.calcular(base({ cantidad: 3, precioFob: 10.60, adValoremPct: 6 }), TASAS);
+  assert.equal(r.ok, true);
+  assert.equal(r.igv, 5.39328);
+  assert.equal(r2(r.igv), 5.39);
+  assert.equal(r2(r.costoUnitario), 11.24);   // 33.708 / 3
+});
+
+test('I) normalizarTasas acepta el formato rates.json ({valor, fuente})', () => {
+  const crudo = {
+    igv: { valor: 0.16, fuente: 'x' },
+    ipm: { valor: 0.02 },
+    ad_valorem: { opciones: [0, 0.06, 0.11] },
+    percepcion: { opciones: [0.035, 0.10], defecto: 0.10 },
+    tipo_cambio: { USD: 3.90 },
+    gastos_locales_default: { agente: 500 }
+  };
+  const t = Calc.normalizarTasas(crudo);
+  assert.equal(t.igv, 0.16);
+  assert.deepEqual(t.ad_valorem_opciones, [0, 0.06, 0.11]);
+  assert.deepEqual(t.percepcion_opciones, [0.035, 0.10]);
+  assert.equal(t.percepcion_default, 0.10);
+  assert.equal(t.tipo_cambio_referencial.USD, 3.90);
+  assert.equal(t.gastos_locales_default.agente, 500);
+  // Lo no enviado conserva el defecto
+  assert.equal(t.tipo_cambio_referencial.PEN, 1);
+});
+
+test('J) Gastos locales por defecto se pueden leer desde la configuración', () => {
+  const t = Calc.normalizarTasas(null);
+  assert.equal(t.gastos_locales_default.agente > 0, true);
+  assert.equal(t.gastos_locales_default.transporte > 0, true);
 });
