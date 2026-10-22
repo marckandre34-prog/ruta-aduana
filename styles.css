@@ -311,6 +311,12 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 .tc-row label { margin: 0; font-weight: 400; }
 .tc-row input { width: 110px; min-height: 44px; padding: 6px 12px; }
 .tc-nota { color: var(--texto-suave); font-size: 0.82rem; }
+/* El TC automático falló: pide el valor manual, no es silencioso */
+.tc-row.pendiente {
+  background: var(--atencion-fondo);
+  border-color: var(--atencion);
+}
+.tc-row.pendiente .tc-nota { color: var(--atencion); font-weight: 500; }
 
 .seg-seguro { margin-bottom: 12px; }
 

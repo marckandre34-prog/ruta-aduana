@@ -229,3 +229,44 @@ test('J) Gastos locales por defecto se pueden leer desde la configuración', () 
   assert.equal(t.gastos_locales_default.agente > 0, true);
   assert.equal(t.gastos_locales_default.transporte > 0, true);
 });
+
+/*
+ * Casos literales del cliente (C1–C10), calculados a mano.
+ * Seguro = 1% del FOB (auto). Tolerancia ±0.01 (el cliente redondea al final).
+ * Columna "TOTAL" = tributos + percepción = desembolso en aduana.
+ */
+const CASOS_CLIENTE = [
+  // [nombre, cantidad, fobUnit USD, flete USD, tc, advPct, percPct, cif, adv, igvIpm, percepcion, total]
+  ['C1', 100, 5, 150, 3.44, 0,  3.5, 2253.20, 0.00,    405.58,  93.06,  498.63],
+  ['C2', 100, 5, 150, 3.44, 6,  3.5, 2253.20, 135.19,  429.91,  98.64,  663.74],
+  ['C3', 100, 5, 150, 3.44, 11, 3.5, 2253.20, 247.85,  450.19,  103.29, 801.33],
+  ['C4', 100, 5, 150, 3.44, 4,  3.5, 2253.20, 90.13,   421.80,  96.78,  608.71],
+  ['C5', 100, 5, 150, 3.44, 0,  10,  2253.20, 0.00,    405.58,  265.88, 671.45],
+  ['C6', 100, 5, 150, 3.44, 0,  5,   2253.20, 0.00,    405.58,  132.94, 538.51],
+  ['C7', 100, 5, 150, 3.80, 6,  3.5, 2489.00, 149.34,  474.90,  108.96, 733.20],
+  ['C8', 10, 20, 30, 3.50, 0,   3.5, 812.00,  0.00,    146.16,  33.54,  179.70],
+  ['C9', 1000, 2.50, 800, 3.40, 11, 3.5, 11305.00, 1243.55, 2258.74, 518.26, 4020.54],
+  ['C10', 1, 100, 0, 3.44, 0,   3.5, 347.44,  0.00,    62.54,   14.35,  76.89]
+];
+
+const cerca = (real, esperado, etiqueta) =>
+  assert.ok(Math.abs(r2(real) - esperado) <= 0.01,
+    `${etiqueta}: obtenido ${r2(real)}, esperado ${esperado}`);
+
+for (const [n, cant, fobU, flete, tc, adv, perc, cif, advEsp, igvIpm, percEsp, total] of CASOS_CLIENTE) {
+  test(`${n}) caso literal del cliente`, () => {
+    const r = Calc.calcular(base({
+      cantidad: cant, precioFob: fobU, monedaFob: 'USD',
+      flete, monedaFlete: 'USD',
+      seguroModo: 'auto',
+      adValoremPct: adv, percepcionPct: perc,
+      fx: { USD: tc, PEN: 1 }
+    }), TASAS);
+    assert.equal(r.ok, true, n);
+    cerca(r.cif, cif, `${n} CIF`);
+    cerca(r.adValorem, advEsp, `${n} ad valorem`);
+    cerca(r.igv + r.ipm, igvIpm, `${n} IGV+IPM`);
+    cerca(r.percepcion, percEsp, `${n} percepción`);
+    cerca(r.desembolsoAduana, total, `${n} TOTAL tributos a pagar`);
+  });
+}

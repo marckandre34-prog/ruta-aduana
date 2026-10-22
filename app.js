@@ -97,12 +97,20 @@
           }
           info.textContent = tpl(t('tcAutoOk'), { valor: fmtNum(res.valor, 3), fuente: res.fuente, fecha: res.fecha });
           info.hidden = false;
+          marcarTcPendiente(false);
           return;
         }
       } catch (e) { /* intenta la siguiente fuente */ }
     }
+    // Falló todo: avisar claramente y pedir el valor manual — no usar un
+    // valor viejo en silencio.
     info.textContent = t('tcAutoFail');
     info.hidden = false;
+    marcarTcPendiente(true);
+  }
+
+  function marcarTcPendiente(pendiente) {
+    tcRows.forEach(({ row }) => $(row).classList.toggle('pendiente', pendiente));
   }
 
   const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k;
@@ -156,9 +164,9 @@
     const adv = $('f_adv');
     const prev = adv.value;
     adv.innerHTML = '';
-    const niveles = modo === 'avanzado'
-      ? tasas.ad_valorem_opciones
-      : tasas.ad_valorem_opciones.filter(v => v !== 0.04);
+    // Los 4 niveles oficiales (0/4/6/11) se muestran también en modo Simple:
+    // un producto al 4% saldría mal calculado si se ocultara la opción.
+    const niveles = tasas.ad_valorem_opciones;
     niveles.forEach((v) => {
       const op = document.createElement('option');
       op.value = String(v * 100);
@@ -643,6 +651,7 @@
     tcRows.forEach(({ select, input }) => {
       $(input).addEventListener('input', () => {
         fxUsuario[$(select).value] = parseNumero($(input).value);
+        marcarTcPendiente(false); // ya ingresó el valor manual
       });
     });
 
