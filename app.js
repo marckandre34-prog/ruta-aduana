@@ -54,51 +54,68 @@
   }
 
   /* ── Tipo de cambio automático (mejor esfuerzo, siempre editable) ──
-     SUNAT no habilita CORS; se intenta el espejo apis.net.pe y luego
-     open.er-api (referencial). Si todo falla, queda el valor manual. */
+     La fecha mostrada es la que devuelve la API; si la API no informa
+     fecha se indica expresamente — nunca se usa la fecha del navegador.
+     USD: SUNAT vía apis.net.pe → respaldo open.er-api.
+     EUR/CNY: solo desde open.er-api. Lo que no se pueda cargar queda
+     marcado "referencial, actualícelo" — nada fijo en silencio. */
+  const fxOrigen = {}; // { moneda: { fuente, fecha } } — proveniencia visible
+
   async function cargarTCAuto() {
     const info = $('tc-auto-info');
     if (!info) return;
-    const fechaHoy = () => new Date().toLocaleDateString(lang === 'es' ? 'es-PE' : 'en-US');
-    const fuentes = [
-      {
-        url: 'https://api.apis.net.pe/v1/tipo-de-cambio-sunat',
-        leer: d => Number.isFinite(d && d.venta)
-          ? { valor: d.venta, fecha: fechaHoy(), fuente: 'SUNAT (vía apis.net.pe)' } : null
-      },
-      {
-        url: 'https://open.er-api.com/v6/latest/USD',
-        leer: d => d && d.rates && Number.isFinite(d.rates.PEN)
-          ? { valor: d.rates.PEN, fecha: d.time_last_update_utc || fechaHoy(), fuente: 'open.er-api.com (referencial)' } : null
-      }
-    ];
-    for (const f of fuentes) {
-      try {
-        const r = await fetch(f.url);
-        if (!r.ok) continue;
-        const res = f.leer(await r.json());
-        if (res) {
-          if (fxUsuario.USD == null) {
-            tasas.tipo_cambio_referencial.USD = res.valor;
-            actualizarTcRows();
-            recalc();
-          }
-          info.textContent = tpl(t('tcAutoOk'), { valor: fmtNum(res.valor, 3), fuente: res.fuente, fecha: res.fecha });
-          info.hidden = false;
-          marcarTcPendiente(false);
-          return;
-        }
-      } catch (e) { /* intenta la siguiente fuente */ }
-    }
-    // Falló todo: avisar claramente y pedir el valor manual — no usar un
-    // valor viejo en silencio.
-    info.textContent = t('tcAutoFail');
-    info.hidden = false;
-    marcarTcPendiente(true);
-  }
 
-  function marcarTcPendiente(pendiente) {
-    tcRows.forEach(({ row }) => $(row).classList.toggle('pendiente', pendiente));
+    let usd = null;
+    try {
+      const r = await fetch('https://api.apis.net.pe/v1/tipo-de-cambio-sunat');
+      if (r.ok) {
+        const d = await r.json();
+        if (d && Number.isFinite(d.venta)) {
+          usd = { valor: d.venta, fecha: d.fecha || null, fuente: 'SUNAT (vía apis.net.pe)' };
+        }
+      }
+    } catch (e) { /* probar respaldo */ }
+
+    let er = null;
+    try {
+      const r = await fetch('https://open.er-api.com/v6/latest/USD');
+      if (r.ok) {
+        const d = await r.json();
+        if (d && d.rates && Number.isFinite(d.rates.PEN)) {
+          er = {
+            fecha: d.time_last_update_utc || null,
+            usd: d.rates.PEN,
+            aPEN: m => Number.isFinite(d.rates[m]) && d.rates[m] > 0 ? d.rates.PEN / d.rates[m] : null
+          };
+        }
+      }
+    } catch (e) { /* sin respaldo */ }
+
+    if (!usd && er) usd = { valor: er.usd, fecha: er.fecha, fuente: 'open.er-api.com (referencial)' };
+
+    const partes = [];
+    const aplicar = (moneda, dato) => {
+      fxOrigen[moneda] = { fuente: dato.fuente, fecha: dato.fecha };
+      if (fxUsuario[moneda] == null) tasas.tipo_cambio_referencial[moneda] = dato.valor;
+      partes.push(tpl(t('tcAutoItem'), {
+        moneda, valor: fmtNum(dato.valor, 3), fuente: dato.fuente,
+        fecha: dato.fecha || t('tcSinFecha')
+      }));
+    };
+
+    if (usd) aplicar('USD', usd);
+    else partes.push(t('tcAutoFail')); // pide el valor manual, sin reciclar uno viejo
+
+    ['EUR', 'CNY'].forEach(m => {
+      const v = er && er.aPEN(m);
+      if (v) aplicar(m, { valor: v, fecha: er.fecha, fuente: 'open.er-api.com (referencial)' });
+      else partes.push(tpl(t('tcAutoRef'), { moneda: m }));
+    });
+
+    info.textContent = partes.join(' · ');
+    info.hidden = false;
+    actualizarTcRows();
+    recalc();
   }
 
   const t = (k) => (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k;
@@ -227,6 +244,15 @@
       const el = $(row);
       el.hidden = (m === 'PEN');
       if (!el.hidden) $(input).value = tcDe(m);
+      // "Pendiente" = sin fuente automática ni valor manual: la nota muestra
+      // la fuente+fecha si se cargó, o el aviso de referencial si no.
+      el.classList.toggle('pendiente', !el.hidden && fxOrigen[m] == null && fxUsuario[m] == null);
+      const nota = el.querySelector('.tc-nota');
+      if (nota) {
+        nota.textContent = el.hidden ? '' : fxOrigen[m]
+          ? tpl(t('tcNotaAuto'), { fuente: fxOrigen[m].fuente, fecha: fxOrigen[m].fecha || t('tcSinFecha') })
+          : t('tcNota');
+      }
     });
     actualizarTcLabels();
     updatePrefijos();
@@ -639,7 +665,7 @@
     tcRows.forEach(({ select, input }) => {
       $(input).addEventListener('input', () => {
         fxUsuario[$(select).value] = parseNumero($(input).value);
-        marcarTcPendiente(false); // ya ingresó el valor manual
+        actualizarTcRows(); // ya ingresó el valor manual → quita "pendiente"
       });
     });
 
