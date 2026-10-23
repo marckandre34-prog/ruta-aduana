@@ -76,14 +76,29 @@
     return Math.round((n + Number.EPSILON) * 100) / 100;
   }
 
-  // Convierte lo que escribe el usuario ("1.234,56" o "1234.56") a número.
-  // Devuelve NaN si no es interpretable.
+  /*
+   * Convierte lo que escribe el usuario a número. Acepta separador de
+   * miles y decimal en ambos órdenes ("1,234.56" / "1.234,56"), decimal
+   * con coma ("1234,56") y espacios como miles ("1 234,5").
+   * Reglas: si hay punto y coma, el ÚLTIMO separador es el decimal; si
+   * solo hay comas con patrón de miles (1,234 / 12,345,678) se quitan;
+   * si solo hay puntos se tratan como decimales (1.2.3 → NaN).
+   * Devuelve NaN si no es interpretable.
+   */
   function num(v) {
     if (typeof v === 'number') return Number.isFinite(v) ? v : NaN;
     if (typeof v !== 'string') return NaN;
-    const limpio = v.trim().replace(/\s/g, '').replace(/,/g, '.');
-    if (limpio === '') return NaN;
-    const n = Number(limpio);
+    let s = v.trim().replace(/\s/g, '');
+    if (s === '') return NaN;
+    const hasC = s.includes(','), hasP = s.includes('.');
+    if (hasC && hasP) {
+      s = s.lastIndexOf(',') > s.lastIndexOf('.')
+        ? s.replace(/\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else if (hasC) {
+      s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
+    }
+    const n = Number(s);
     return Number.isFinite(n) ? n : NaN;
   }
 

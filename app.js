@@ -27,20 +27,8 @@
     f_transporte: 2, f_otros: 2, f_percepcion_fija: 2
   };
 
-  // Parseo tolerante: acepta "1,234.56", "1234,56" y "3,75"
-  function parseNumero(v) {
-    let s = String(v).trim().replace(/\s/g, '');
-    if (!s) return NaN;
-    const hasC = s.includes(','), hasP = s.includes('.');
-    if (hasC && hasP) {
-      s = s.lastIndexOf(',') > s.lastIndexOf('.')
-        ? s.replace(/\./g, '').replace(',', '.')
-        : s.replace(/,/g, '');
-    } else if (hasC) {
-      s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
-    }
-    return Number(s);
-  }
+  // Parseo tolerante: la lógica vive en Calc.num (única fuente).
+  function parseNumero(v) { return Calc.num(v); }
 
   function updatePrefijos() {
     $('prefijo-precio').textContent = SIMBOLO[$('f_moneda').value];
