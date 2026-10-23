@@ -74,6 +74,7 @@ function matchSel(el, sel) {
   if (sel === '.tooltip') return el._classes.has('tooltip');
   if (sel === '.detalle') return el._classes.has('detalle');
   if (sel === '.tc-label') return el._classes.has('tc-label');
+  if (sel === '.tc-nota') return el._classes.has('tc-nota');
   if (sel === '#form input, #form select') {
     if (el.tagName !== 'INPUT' && el.tagName !== 'SELECT') return false;
     let n = el.parent; while (n) { if (n.attrs.id === 'form') return true; n = n.parent; }
@@ -132,7 +133,19 @@ global.localStorage = {
 global.window = { addEventListener: () => {}, innerWidth: 1280, innerHeight: 800, scrollX: 0, scrollY: 0, print: () => {} };
 Object.defineProperty(globalThis, 'navigator', { value: { clipboard: { writeText: async () => {} } }, configurable: true });
 global.confirm = () => true;
-global.fetch = async (url) => ({ ok: true, json: async () => JSON.parse(fs.readFileSync(url, 'utf8')) });
+// fetch falso: las APIs externas devuelven datos controlados; lo demás lee disco.
+// apis.net.pe trae fecha; er-api NO trae time_last_update_utc a propósito
+// para verificar el caso "fecha no informada".
+global.fetch = async (url) => {
+  const u = String(url);
+  if (u.includes('apis.net.pe')) {
+    return { ok: true, json: async () => ({ compra: 3.44, venta: 3.45, fecha: '2026-10-22' }) };
+  }
+  if (u.includes('er-api')) {
+    return { ok: true, json: async () => ({ rates: { PEN: 3.45, EUR: 0.85, CNY: 7.1 } }) };
+  }
+  return { ok: true, json: async () => JSON.parse(fs.readFileSync(url, 'utf8')) };
+};
 global.getComputedStyle = () => ({ backgroundColor: 'rgb(0,0,0)' });
 
 global.Calc = require('../calc.js');
@@ -145,6 +158,19 @@ require('../app.js');
 
   const $ = id => byId[id];
   const set = (id, v) => { $(id).value = v; $(id)._fire('input'); };
+  const check = (cond, msg) => { if (!cond) throw new Error('SMOKE FALLÓ: ' + msg); console.log('  ✓', msg); };
+
+  // — Tipo de cambio automático: fecha de la API (no del navegador) —
+  const tcInfo = $('tc-auto-info').textContent;
+  check(tcInfo.includes('2026-10-22'), 'USD muestra la fecha que devolvió la API (2026-10-22)');
+  check(tcInfo.includes('EUR') && tcInfo.includes('CNY'), 'EUR y CNY se cargan desde la misma fuente');
+  check(tcInfo.includes('open.er-api.com'), 'EUR/CNY indican su fuente (open.er-api.com)');
+  check(tcInfo.includes('fecha no informada'), 'er-api sin fecha → "fecha no informada" (nunca la del navegador)');
+  $('f_moneda').value = 'USD'; $('f_moneda')._fire('change'); // el stub no elige la 1.ª opción
+  const notaFob = $('tc-row-fob').querySelector('.tc-nota').textContent;
+  check(notaFob.includes('apis.net.pe') && notaFob.includes('2026-10-22'),
+    'la fila del TC muestra fuente y fecha por campo');
+  check(!$('tc-row-fob').classList.contains('pendiente'), 'USD cargado → fila sin marca "pendiente"');
 
   // — Estado vacío —
   console.log('vacio visible:', !$('estado-vacio').hidden, '| marca:', $('resultados') && $('estado-vacio').hidden === false);
