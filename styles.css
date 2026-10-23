@@ -158,6 +158,14 @@ h1, h2, h3, .res-numero, .res-numero-med, .hanko {
 }
 .aviso-tasas a { color: var(--primario); font-weight: 500; }
 
+.tc-auto-info {
+  max-width: 1132px;
+  margin: 8px auto 0;
+  padding: 0 24px;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
 /* ── Layout ── */
 .layout {
   max-width: 1180px;
@@ -303,11 +311,18 @@ input::placeholder { color: var(--texto-suave); opacity: 0.7; }
 .tc-row label { margin: 0; font-weight: 400; }
 .tc-row input { width: 110px; min-height: 44px; padding: 6px 12px; }
 .tc-nota { color: var(--texto-suave); font-size: 0.82rem; }
+/* El TC automático falló: pide el valor manual, no es silencioso */
+.tc-row.pendiente {
+  background: var(--atencion-fondo);
+  border-color: var(--atencion);
+}
+.tc-row.pendiente .tc-nota { color: var(--atencion); font-weight: 500; }
 
 .seg-seguro { margin-bottom: 12px; }
 
 .grid-locales { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
 .grid-locales .campo { margin-bottom: 0; }
+.locales-nota { display: block; margin-bottom: 14px; color: var(--texto-suave); }
 
 .enlace-ayuda {
   display: inline-block;

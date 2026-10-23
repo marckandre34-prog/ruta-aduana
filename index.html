@@ -49,6 +49,7 @@
   <span id="aviso-texto"></span>
   <a id="aviso-link" href="#" target="_blank" rel="noopener"></a>
 </p>
+<p class="tc-auto-info" id="tc-auto-info" hidden></p>
 
 <main class="layout">
 
@@ -174,6 +175,14 @@
       </div>
 
       <div class="campo advanced-only">
+        <label for="f_antidumping">
+          <span data-i18n="lAntidumping">Derecho antidumping (%)</span>
+          <button type="button" class="ayuda" data-help="antidumping" aria-label="?">?</button>
+        </label>
+        <div class="grupo-pct"><input type="number" id="f_antidumping" min="0" step="any" inputmode="decimal" value="0"><span class="unidad">%</span></div>
+      </div>
+
+      <div class="campo advanced-only">
         <label for="f_percepcion">
           <span data-i18n="lPercepcion">Percepción</span>
           <button type="button" class="ayuda" data-help="percepcion" aria-label="?">?</button>
@@ -191,6 +200,7 @@
 
       <fieldset class="campo advanced-only">
         <legend><span data-i18n="lGastosLocales">Gastos locales (en soles)</span></legend>
+        <small class="tc-nota locales-nota" data-i18n="localesEstimado">Montos referenciales, edítelos según su cotización.</small>
         <div class="grid-locales">
           <div class="campo"><label for="f_agente" data-i18n="lAgente">Agente de aduana</label>
             <div class="input-dinero"><span class="prefijo" aria-hidden="true">S/</span>

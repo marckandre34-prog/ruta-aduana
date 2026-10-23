@@ -1,0 +1,50 @@
+{
+  "vigente_a_fecha": "2026-10-22",
+  "fuente_general": "SUNAT (sunat.gob.pe / aduanet.gob.pe). Verifique la subpartida de su producto.",
+  "sunat_arancel_url": "https://www.aduanet.gob.pe/itarancel/arancelS01Alias",
+
+  "igv": {
+    "valor": 0.16,
+    "vigente_desde": "2011-03-01",
+    "fuente": "TUO Ley del IGV e ISC, D.S. 055-99-EF, art. 17°. Base: CIF + derechos e impuestos de la importación (art. 13° inc. e)."
+  },
+  "ipm": {
+    "valor": 0.02,
+    "vigente_desde": "2011-03-01",
+    "fuente": "TUO Ley de Tributación Municipal, D.Leg. 776. Misma base que el IGV."
+  },
+  "ad_valorem": {
+    "opciones": [0, 0.04, 0.06, 0.11],
+    "fuente": "Arancel de Aduanas SUNAT: 4 niveles (0%, 4%, 6%, 11%) según subpartida nacional — aduanet.gob.pe/aduanas/informag/tribadua.htm"
+  },
+  "percepcion": {
+    "opciones": [0.035, 0.05, 0.10],
+    "defecto": 0.035,
+    "fuente": "R.S. N° 203-2003/SUNAT. 3.5% general; 5% al nacionalizar bienes usados; 10% sin RUC, no domiciliado o baja de oficio. Base: valor en aduana + todos los tributos que gravan la importación + derechos antidumping/compensatorios."
+  },
+  "seguro_default": {
+    "valor": 0.01,
+    "fuente": "Estimado referencial (1% del FOB). No es una tasa oficial: edítelo según su póliza."
+  },
+  "isc_default": {
+    "valor": 0,
+    "fuente": "SUNAT — ISC solo para bienes del Apéndice IV de la Ley del IGV. La mayoría de mercancías paga 0%."
+  },
+  "gastos_locales_default": {
+    "agente": 400,
+    "desaduanaje": 0,
+    "almacenaje": 100,
+    "transporte": 150,
+    "otros": 0,
+    "fuente": "Estimados referenciales en soles. No oficiales: reemplácelos por sus cotizaciones reales."
+  },
+  "tipo_cambio": {
+    "USD": 3.75,
+    "EUR": 4.10,
+    "CNY": 0.52,
+    "PEN": 1,
+    "fuente": "Referencial. Actualícelo con el tipo de cambio SUNAT/SBS del día de la operación."
+  },
+  "escenarios_tipo_cambio": [-0.03, 0, 0.03, 0.05, 0.10],
+  "redondeo": "Se calcula con precisión completa y se redondea a 2 decimales (céntimos) únicamente al mostrar el resultado final."
+}

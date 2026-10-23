@@ -11,3 +11,7 @@ Desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# Secretos / variables de entorno (no subir nunca)
+.env
+*.env.local
