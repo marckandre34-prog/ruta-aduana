@@ -253,6 +253,26 @@ const cerca = (real, esperado, etiqueta) =>
   assert.ok(Math.abs(r2(real) - esperado) <= 0.01,
     `${etiqueta}: obtenido ${r2(real)}, esperado ${esperado}`);
 
+test('K) num() interpreta miles y decimales en ambos órdenes', () => {
+  assert.equal(Calc.num('1,234.56'), 1234.56);
+  assert.equal(Calc.num('1.234,56'), 1234.56);
+  assert.equal(Calc.num('1234,56'), 1234.56);
+  assert.equal(Calc.num('1 234,5'), 1234.5);
+  assert.equal(Calc.num('12,345,678'), 12345678);
+  assert.equal(Calc.num('3,75'), 3.75);
+  assert.equal(Calc.num('1234.56'), 1234.56);
+  assert.equal(Calc.num('-42,5'), -42.5);
+});
+
+test('L) num() rechaza entradas no numéricas', () => {
+  assert.ok(Number.isNaN(Calc.num('1.2.3')));
+  assert.ok(Number.isNaN(Calc.num('1,2,3')));
+  assert.ok(Number.isNaN(Calc.num('abc')));
+  assert.ok(Number.isNaN(Calc.num('')));
+  assert.ok(Number.isNaN(Calc.num('   ')));
+  assert.ok(Number.isNaN(Calc.num('S/ 100')));
+});
+
 for (const [n, cant, fobU, flete, tc, adv, perc, cif, advEsp, igvIpm, percEsp, total] of CASOS_CLIENTE) {
   test(`${n}) caso literal del cliente`, () => {
     const r = Calc.calcular(base({
