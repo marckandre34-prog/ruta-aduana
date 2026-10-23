@@ -136,6 +136,17 @@ test('E) Validaciones de entradas inválidas', () => {
   assert.equal(r.ok, false);
   assert.ok(r.errores.some(e => e.campo === 'margen' && e.codigo === 'menor_cien'));
 
+  // Percepción: igual que ad valorem e ISC, debe ser < 100 %
+  r = Calc.calcular(base({ percepcionPct: 100 }), TASAS);
+  assert.equal(r.ok, false);
+  assert.ok(r.errores.some(e => e.campo === 'percepcion' && e.codigo === 'menor_cien'));
+
+  r = Calc.calcular(base({ percepcionPct: 150 }), TASAS);
+  assert.ok(r.errores.some(e => e.campo === 'percepcion' && e.codigo === 'menor_cien'));
+
+  r = Calc.calcular(base({ percepcionPct: NaN }), TASAS);
+  assert.ok(r.errores.some(e => e.campo === 'percepcion' && e.codigo === 'falta_numero'));
+
   // Número no ingresado
   r = Calc.calcular(base({ precioFob: NaN }), TASAS);
   assert.equal(r.ok, false);

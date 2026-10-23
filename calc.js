@@ -140,9 +140,7 @@
     if (Number.isFinite(e.antidumpingPct) && e.antidumpingPct < 0) {
       errores.push({ campo: 'antidumping', codigo: 'no_negativo' });
     }
-    if (Number.isFinite(e.percepcionPct) && e.percepcionPct < 0) {
-      errores.push({ campo: 'percepcion', codigo: 'no_negativo' });
-    }
+    tasaValida(e.percepcionPct, 'percepcion');
     if (!falta(e.percepcionFija) && e.percepcionFija < 0) {
       errores.push({ campo: 'percepcionFija', codigo: 'no_negativo' });
     }
